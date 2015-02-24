@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Feb 23 2015 16:20:36 GMT-0800 (PST) -->
+    <!--  Build Date: Mon Feb 23 2015 17:53:41 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Feb 23 2015 16:20:36 GMT-0800 (PST)";
-        var CHECKSUM = 2157475690;
+        var APP_BUILD_DATE = "Mon Feb 23 2015 17:53:41 GMT-0800 (PST)";
+        var CHECKSUM = 4856320647;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -151,6 +151,88 @@ Ext.define( 'Rally.technicalservices.gridboard.Gridboard', {
         }
     ]
 });
+Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window',
+    logger: new Rally.technicalservices.Logger(),
+    truncateText: '...',
+    config: {
+        title: 'Blah',
+        records: null,
+        styleSheetTitle: "printCards", 
+        /**
+         *  Array of the following:
+         *  dataIndex
+         *  maxLength (default 0)
+         *  cls (defaults are: card-title, content, 
+         */
+        displayFields: null 
+    },
+    constructor: function(config){
+        this.initConfig(config);
+    },
+    show: function(){
+        var options = "toolbar=1,menubar=1,scrollbars=yes,scrolling=yes,resizable=yes,width=1000,height=500";
+        var win = window.open('',this.title);
+        
+        var html = this._buildCardsHTML();
+        
+        win.document.write('<html><head><title>' + this.title + '</title>');
+        win.document.write('<style>');
+        win.document.write(this._getStyleSheet(this.styleSheetTitle));
+        win.document.write('</style>');
+        win.document.write('</head><body class="landscape">');
+        win.document.write(html);
+        win.document.write('</body></html>');
+        
+        win.document.close();
+        
+        win.print();
+        
+    },
+    _buildCardsHTML: function() {
+
+        var html = '';
+        var total_cards = this.records.length; 
+        var card_num = 0; 
+        console.log('records', this.records);
+        Ext.each(this.records, function(r){
+            
+            var value_html = '';
+            //Todo organize by content or header...
+            Ext.each(this.displayFields, function(df){
+                var value = r.get(df.dataIndex);
+                df.maxLenth = df.maxLength || 0;
+                if (df.maxLength > 0 && value.length > df.maxLength){
+                    value = value.substring(0,df.maxLength);
+                    value = value + this.truncateText;
+                }
+                value_html += Ext.String.format('<span class="{0}">{1}</span>',df.cls,value);
+            }, this);
+            html += Ext.String.format('<div class="artifact">{0}</div>', value_html);
+            
+            card_num ++; 
+            if ((card_num + 1) % 2 === 0) {
+                html += '<div class=pb></div>';
+            } else if (card_num === total_cards - 1) {
+                html += '<div class=cb>&nbsp;</div>';
+            }
+        },this);
+        console.log('html',html);
+        return html;  
+    },
+    _getStyleSheet: function(styleSheetTitle) {
+        this.logger.log('getStyleSheet');
+        var styleSheet;
+        var docs = Ext.getDoc(); 
+        var elems = docs.query('style');
+        console.log(docs, elems);
+        for (var i=0; i< elems.length; i++){
+            if (elems[i].title == styleSheetTitle){
+                styleSheet = elems[i];
+            }
+        }
+        return styleSheet.innerHTML;
+    }
+});
 Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
@@ -210,9 +292,10 @@ Ext.define('CustomApp', {
                                         this._getSelectedStories( gridorboard ).then({
                                             scope: this,
                                             success: function(stories){
-                                                Ext.Array.each(stories,function(story){
-                                                    console.log(story.get('FormattedID'));
-                                                });
+                                                this._openPrintCards(stories);
+//                                                Ext.Array.each(stories,function(story){
+//                                                    console.log(story.get('FormattedID'));
+//                                                });
                                             },
                                             failure: function(msg) {
                                                 alert(msg);
@@ -260,32 +343,38 @@ Ext.define('CustomApp', {
                 promises.push(this._getChildItems(selected_item));
             }
         },this);
+                
+        if (promises.length > 0) {
         
-        Deft.Promise.all(promises).then({
-            scope: this,
-            success: function(child_stories){
-                var fids_returned = [];
-                var stories_to_return = [];
-                
-                Ext.Array.each(stories,function(story){
-                    fids_returned.push(story.get('FormattedID'));
-                    stories_to_return.push(story);
-                });
-                
-                Ext.Array.each(Ext.Array.flatten(child_stories),function(story){
-                    if ( Ext.Array.indexOf(fids_returned, story.get('FormattedID')) == -1 ) {
+            Deft.Promise.all(promises).then({
+                scope: this,
+                success: function(child_stories){
+                    var fids_returned = [];
+                    var stories_to_return = [];
+                    
+                    Ext.Array.each(stories,function(story){
                         fids_returned.push(story.get('FormattedID'));
                         stories_to_return.push(story);
-                    }
-                });
-                
-                deferred.resolve(stories_to_return);
-                
-            },
-            failure: function(msg) {
-                deferred.reject(msg);
-            }
-        });
+                    });
+                    
+                    Ext.Array.each(Ext.Array.flatten(child_stories),function(story){
+                        if ( Ext.Array.indexOf(fids_returned, story.get('FormattedID')) == -1 ) {
+                            fids_returned.push(story.get('FormattedID'));
+                            stories_to_return.push(story);
+                        }
+                    });
+                    
+                    deferred.resolve(stories_to_return);
+                    
+                },
+                failure: function(msg) {
+                    deferred.reject(msg);
+                }
+            });
+            
+        } else {
+            deferred.resolve(stories);
+        }
         return deferred.promise;
     },
     _getChildItems: function(selected_item){
@@ -305,7 +394,26 @@ Ext.define('CustomApp', {
             }
         });
         return deferred.promise;
+    },
+    _openPrintCards: function(records){
+        
+        var fields =[{
+            dataIndex: 'Name',
+            maxLength: 100,
+            cls: 'card-title'
+        },{
+            dataIndex: 'FormattedID',
+            cls: 'card-id'
+        }];
+        
+        var win = Ext.create('Rally.technicalservices.window.PrintCards',{
+            records: records,
+            displayFields: fields,
+            currentDocument: Ext.getDoc()
+        });
+        win.show();
     }
+    
 });
 
             
@@ -315,7 +423,7 @@ Ext.define('CustomApp', {
         });
     </script>
     
-    <style type="text/css">
+    <style type="text/css" title="printCards">
 
 .app {
 }
@@ -334,6 +442,116 @@ Ext.define('CustomApp', {
     margin-right: 5px;
     cursor: pointer;
 }
+
+<style type="text/css" title="printCards">
+            /* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY */
+        @media print {
+            #interface {
+                display: none;
+            }
+
+            .pb {
+                page-break-after: always;
+                clear: both;
+            }
+        }
+
+        #buttonDiv,
+        #iterationDropdown {
+            display: inline;
+        }
+
+        #interface, #printSection {
+            margin: 20px;
+        }
+
+        html {
+            background-color: #fff;
+            color: #000;
+            font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .cb {
+            clear: both;
+        }
+
+        .artifact {
+            background-color: #fff;
+            border: 2px solid #000;
+            float: left;
+            height: 3.2in;
+            margin: 0.1in 0.1in 0.1in 0.1in;
+            position: relative;
+            overflow: hidden;
+            width: 4.3in;
+        }
+
+        .header {
+            border: 1px;
+            border-bottom-style: solid;
+            display: table-cell;
+            height: 40px;
+            vertical-align: middle;
+            width: 4.3in;
+        }
+
+        .card-title {
+            font: bold 28px Genova, sans-serif;
+            padding-top: 0.5em;
+            text-align: center;
+        }
+
+        .description {
+            float: left;
+            font: 12pt Georgia, sans-serif;
+            margin: 0.25em auto 0 auto;
+            padding-left: 1.0em;
+            padding-right: 1.0em;
+            overflow-y: hidden;
+            width: 100%;
+            word-wrap: break-word;
+        }
+
+        .owner {
+            float: right;
+            height: 40px;
+        }
+
+        .ownerText {
+            float: right;
+            font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+            margin-right: 0.3em;
+            margin-top: 0.3em;
+        }
+
+        .storyID {
+            float: left;
+            font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+            margin-left: 0.25em;
+            margin-top: 0.3em;
+        }
+
+        .estimate {
+            bottom: 0.5em;
+            position: absolute;
+            right: 0.5em;
+        }
+
+        .content {
+            height: 2.4in;
+            overflow: hidden;
+            width: 4.3in;
+        }
+
+    </style>
     </style>
 
 </head>
