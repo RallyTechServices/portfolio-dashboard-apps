@@ -76,16 +76,16 @@
             width: 4.3in;
         }
 
-        .card-title {
+        .cardTitle {
             font: bold 28px Genova, sans-serif;
-            padding-top: 0.5em;
+            padding-top: 5em;
             text-align: center;
         }
 
         .description {
             float: left;
             font: 12pt Georgia, sans-serif;
-            margin: 0.25em auto 0 auto;
+            margin: 15em auto 0 auto;
             padding-left: 1.0em;
             padding-right: 1.0em;
             overflow-y: hidden;
@@ -93,26 +93,21 @@
             word-wrap: break-word;
         }
 
-        .owner {
+        .cardUpperRight {
             float: right;
-            height: 40px;
-        }
-
-        .ownerText {
-            float: right;
-            font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+            font: bold 20px Arial, Helvetica, sans-serif;
             margin-right: 0.3em;
             margin-top: 0.3em;
         }
 
-        .storyID {
+        .cardUpperLeft {
             float: left;
-            font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+            font: bold 20px Arial, Helvetica, sans-serif;
             margin-left: 0.25em;
             margin-top: 0.3em;
         }
 
-        .estimate {
+        .card-lower-right {
             bottom: 0.5em;
             position: absolute;
             right: 0.5em;
@@ -123,5 +118,4 @@
             overflow: hidden;
             width: 4.3in;
         }
-
     </style>

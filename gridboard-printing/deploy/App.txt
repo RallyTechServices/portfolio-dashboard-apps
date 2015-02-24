@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Feb 23 2015 17:53:41 GMT-0800 (PST) -->
+    <!--  Build Date: Mon Feb 23 2015 18:13:30 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Feb 23 2015 17:53:41 GMT-0800 (PST)";
-        var CHECKSUM = 4856320647;
+        var APP_BUILD_DATE = "Mon Feb 23 2015 18:13:30 GMT-0800 (PST)";
+        var CHECKSUM = 4858355655;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -193,7 +193,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         var html = '';
         var total_cards = this.records.length; 
         var card_num = 0; 
-        console.log('records', this.records);
+
         Ext.each(this.records, function(r){
             
             var value_html = '';
@@ -205,7 +205,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
                     value = value.substring(0,df.maxLength);
                     value = value + this.truncateText;
                 }
-                value_html += Ext.String.format('<span class="{0}">{1}</span>',df.cls,value);
+                value_html += Ext.String.format('<div class="{0}">{1}</div>',df.cls,value);
             }, this);
             html += Ext.String.format('<div class="artifact">{0}</div>', value_html);
             
@@ -398,12 +398,17 @@ Ext.define('CustomApp', {
     _openPrintCards: function(records){
         
         var fields =[{
+            dataIndex: 'FormattedID',
+            cls: 'cardUpperLeft'
+        },
+        {
+            dataIndex: 'PlanEstimate',
+            cls: 'cardUpperRight'
+        },
+        {
             dataIndex: 'Name',
             maxLength: 100,
-            cls: 'card-title'
-        },{
-            dataIndex: 'FormattedID',
-            cls: 'card-id'
+            cls: 'cardTitle'
         }];
         
         var win = Ext.create('Rally.technicalservices.window.PrintCards',{
@@ -503,16 +508,16 @@ Ext.define('CustomApp', {
             width: 4.3in;
         }
 
-        .card-title {
+        .cardTitle {
             font: bold 28px Genova, sans-serif;
-            padding-top: 0.5em;
+            padding-top: 5em;
             text-align: center;
         }
 
         .description {
             float: left;
             font: 12pt Georgia, sans-serif;
-            margin: 0.25em auto 0 auto;
+            margin: 15em auto 0 auto;
             padding-left: 1.0em;
             padding-right: 1.0em;
             overflow-y: hidden;
@@ -520,26 +525,21 @@ Ext.define('CustomApp', {
             word-wrap: break-word;
         }
 
-        .owner {
+        .cardUpperRight {
             float: right;
-            height: 40px;
-        }
-
-        .ownerText {
-            float: right;
-            font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+            font: bold 20px Arial, Helvetica, sans-serif;
             margin-right: 0.3em;
             margin-top: 0.3em;
         }
 
-        .storyID {
+        .cardUpperLeft {
             float: left;
-            font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+            font: bold 20px Arial, Helvetica, sans-serif;
             margin-left: 0.25em;
             margin-top: 0.3em;
         }
 
-        .estimate {
+        .card-lower-right {
             bottom: 0.5em;
             position: absolute;
             right: 0.5em;
@@ -550,7 +550,6 @@ Ext.define('CustomApp', {
             overflow: hidden;
             width: 4.3in;
         }
-
     </style>
     </style>
 

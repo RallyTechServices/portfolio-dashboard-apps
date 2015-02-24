@@ -40,7 +40,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         var html = '';
         var total_cards = this.records.length; 
         var card_num = 0; 
-        console.log('records', this.records);
+
         Ext.each(this.records, function(r){
             
             var value_html = '';
@@ -52,7 +52,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
                     value = value.substring(0,df.maxLength);
                     value = value + this.truncateText;
                 }
-                value_html += Ext.String.format('<span class="{0}">{1}</span>',df.cls,value);
+                value_html += Ext.String.format('<div class="{0}">{1}</div>',df.cls,value);
             }, this);
             html += Ext.String.format('<div class="artifact">{0}</div>', value_html);
             

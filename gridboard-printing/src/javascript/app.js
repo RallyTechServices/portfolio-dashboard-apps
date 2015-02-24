@@ -163,12 +163,17 @@ Ext.define('CustomApp', {
     _openPrintCards: function(records){
         
         var fields =[{
+            dataIndex: 'FormattedID',
+            cls: 'cardUpperLeft'
+        },
+        {
+            dataIndex: 'PlanEstimate',
+            cls: 'cardUpperRight'
+        },
+        {
             dataIndex: 'Name',
             maxLength: 100,
-            cls: 'card-title'
-        },{
-            dataIndex: 'FormattedID',
-            cls: 'card-id'
+            cls: 'cardTitle'
         }];
         
         var win = Ext.create('Rally.technicalservices.window.PrintCards',{
