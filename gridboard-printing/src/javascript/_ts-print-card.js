@@ -41,12 +41,17 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         var total_cards = this.records.length; 
         var card_num = 0; 
 
-        Ext.each(this.records, function(r){
+        console.log('records to print', this.records);
+        
+        Ext.each(this.records, function(record){
             
             var value_html = '';
             //Todo organize by content or header...
             Ext.each(this.displayFields, function(df){
-                var value = r.get(df.dataIndex);
+                var value = record.get(df.dataIndex);
+                if ( df.renderer ) {
+                    value = df.renderer(value,null,record);
+                }
                 df.maxLenth = df.maxLength || 0;
                 if (df.maxLength > 0 && value.length > df.maxLength){
                     value = value.substring(0,df.maxLength);
@@ -63,7 +68,6 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
                 html += '<div class=cb>&nbsp;</div>';
             }
         },this);
-        console.log('html',html);
         return html;  
     },
     _getStyleSheet: function(styleSheetTitle) {
@@ -71,7 +75,6 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         var styleSheet;
         var docs = Ext.getDoc(); 
         var elems = docs.query('style');
-        console.log(docs, elems);
         for (var i=0; i< elems.length; i++){
             if (elems[i].title == styleSheetTitle){
                 styleSheet = elems[i];

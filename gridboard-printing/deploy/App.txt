@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Feb 23 2015 18:13:30 GMT-0800 (PST) -->
+    <!--  Build Date: Tue Feb 24 2015 09:49:18 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Feb 23 2015 18:13:30 GMT-0800 (PST)";
-        var CHECKSUM = 4858355655;
+        var APP_BUILD_DATE = "Tue Feb 24 2015 09:49:18 GMT-0800 (PST)";
+        var CHECKSUM = 5439596350;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -194,12 +194,17 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         var total_cards = this.records.length; 
         var card_num = 0; 
 
-        Ext.each(this.records, function(r){
+        console.log('records to print', this.records);
+        
+        Ext.each(this.records, function(record){
             
             var value_html = '';
             //Todo organize by content or header...
             Ext.each(this.displayFields, function(df){
-                var value = r.get(df.dataIndex);
+                var value = record.get(df.dataIndex);
+                if ( df.renderer ) {
+                    value = df.renderer(value,null,record);
+                }
                 df.maxLenth = df.maxLength || 0;
                 if (df.maxLength > 0 && value.length > df.maxLength){
                     value = value.substring(0,df.maxLength);
@@ -216,7 +221,6 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
                 html += '<div class=cb>&nbsp;</div>';
             }
         },this);
-        console.log('html',html);
         return html;  
     },
     _getStyleSheet: function(styleSheetTitle) {
@@ -224,7 +228,6 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         var styleSheet;
         var docs = Ext.getDoc(); 
         var elems = docs.query('style');
-        console.log(docs, elems);
         for (var i=0; i< elems.length; i++){
             if (elems[i].title == styleSheetTitle){
                 styleSheet = elems[i];
@@ -402,6 +405,30 @@ Ext.define('CustomApp', {
             cls: 'cardUpperLeft'
         },
         {
+            dataIndex: 'c_MoSCoW',
+            cls: 'cardTopCenter'
+        },
+        {
+            dataIndex: 'Feature',
+            cls: 'cardLowerLeft',
+            renderer: function(value,meta_data,record){
+                if ( !value ) {
+                    return "";
+                }
+                return record.get('Feature').FormattedID + ":" + record.get('Feature').Name;
+            }
+        },
+        {
+            dataIndex: 'Project',
+            cls: 'cardLowerRight',
+            renderer: function(value,meta_data,record){
+                if ( !value ) {
+                    return "";
+                }
+                return record.get('Project').Parent.Name + "<br/>" + record.get('Project').Name;
+            }
+        },
+        {
             dataIndex: 'PlanEstimate',
             cls: 'cardUpperRight'
         },
@@ -530,6 +557,7 @@ Ext.define('CustomApp', {
             font: bold 20px Arial, Helvetica, sans-serif;
             margin-right: 0.3em;
             margin-top: 0.3em;
+            display: inline-block;
         }
 
         .cardUpperLeft {
@@ -539,17 +567,31 @@ Ext.define('CustomApp', {
             margin-top: 0.3em;
         }
 
-        .card-lower-right {
+        .cardLowerLeft {
+            bottom: 0.5em;
+            left: 0.5em;
+            position: absolute;
+        }
+        
+        .cardLowerRight {
             bottom: 0.5em;
             position: absolute;
             right: 0.5em;
         }
 
+        .cardTopCenter {
+            text-align: center;
+            position: absolute;
+            right: 0.5in;
+            width: 3in;
+        }
+        
         .content {
             height: 2.4in;
             overflow: hidden;
             width: 4.3in;
         }
+
     </style>
     </style>
 

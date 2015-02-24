@@ -167,6 +167,30 @@ Ext.define('CustomApp', {
             cls: 'cardUpperLeft'
         },
         {
+            dataIndex: 'c_MoSCoW',
+            cls: 'cardTopCenter'
+        },
+        {
+            dataIndex: 'Feature',
+            cls: 'cardLowerLeft',
+            renderer: function(value,meta_data,record){
+                if ( !value ) {
+                    return "";
+                }
+                return record.get('Feature').FormattedID + ":" + record.get('Feature').Name;
+            }
+        },
+        {
+            dataIndex: 'Project',
+            cls: 'cardLowerRight',
+            renderer: function(value,meta_data,record){
+                if ( !value ) {
+                    return "";
+                }
+                return record.get('Project').Parent.Name + "<br/>" + record.get('Project').Name;
+            }
+        },
+        {
             dataIndex: 'PlanEstimate',
             cls: 'cardUpperRight'
         },
