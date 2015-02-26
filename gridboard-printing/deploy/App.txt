@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Feb 26 2015 07:53:51 GMT-0800 (PST) -->
+    <!--  Build Date: Thu Feb 26 2015 08:00:19 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Feb 26 2015 07:53:51 GMT-0800 (PST)";
-        var CHECKSUM = 5463787977;
+        var APP_BUILD_DATE = "Thu Feb 26 2015 08:00:19 GMT-0800 (PST)";
+        var CHECKSUM = 5557176736;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -251,7 +251,7 @@ Ext.define('CustomApp', {
             models: ['portfolioitem/feature'] ,
             autoLoad: true,
             enableHierarchy: true,
-            
+            fetch: ['c_MoSCoW','Name','ObjectID','Feature','PortfolioItem','FormattedID','Project'],
             _getStoreTypePaths: function() {
                 return ['portfolioitem/feature','hierarchicalrequirement'];
             }
@@ -280,14 +280,14 @@ Ext.define('CustomApp', {
                         {
                             ptype: 'rallygridboardactionsmenu',
                             menuItems: [
-                                {
-                                    text: 'Export...',
-                                    handler: function() {
-                                        window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(
-                                            this.down('rallygridboard').getGridOrBoard());
-                                    },
-                                    scope: this
-                                },
+//                                {
+//                                    text: 'Export...',
+//                                    handler: function() {
+//                                        window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(
+//                                            this.down('rallygridboard').getGridOrBoard());
+//                                    },
+//                                    scope: this
+//                                },
                                 {
                                     text: 'Print Selected Stories...',
                                     handler: function() {

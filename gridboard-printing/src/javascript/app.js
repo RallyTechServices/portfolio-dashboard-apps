@@ -13,7 +13,7 @@ Ext.define('CustomApp', {
             models: ['portfolioitem/feature'] ,
             autoLoad: true,
             enableHierarchy: true,
-            
+            fetch: ['c_MoSCoW','Name','ObjectID','Feature','PortfolioItem','FormattedID','Project'],
             _getStoreTypePaths: function() {
                 return ['portfolioitem/feature','hierarchicalrequirement'];
             }
@@ -42,14 +42,14 @@ Ext.define('CustomApp', {
                         {
                             ptype: 'rallygridboardactionsmenu',
                             menuItems: [
-                                {
-                                    text: 'Export...',
-                                    handler: function() {
-                                        window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(
-                                            this.down('rallygridboard').getGridOrBoard());
-                                    },
-                                    scope: this
-                                },
+//                                {
+//                                    text: 'Export...',
+//                                    handler: function() {
+//                                        window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(
+//                                            this.down('rallygridboard').getGridOrBoard());
+//                                    },
+//                                    scope: this
+//                                },
                                 {
                                     text: 'Print Selected Stories...',
                                     handler: function() {
