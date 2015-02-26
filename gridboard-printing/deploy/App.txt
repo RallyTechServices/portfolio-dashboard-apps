@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Tue Feb 24 2015 09:49:18 GMT-0800 (PST) -->
+    <!--  Build Date: Thu Feb 26 2015 07:53:51 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Feb 24 2015 09:49:18 GMT-0800 (PST)";
-        var CHECKSUM = 5439596350;
+        var APP_BUILD_DATE = "Thu Feb 26 2015 07:53:51 GMT-0800 (PST)";
+        var CHECKSUM = 5463787977;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -385,6 +385,7 @@ Ext.define('CustomApp', {
         Ext.create('Rally.data.wsapi.Store', {
             model: 'hierarchicalrequirement',
             autoLoad: true,
+            context: { project: null },
             filters: [{ property:'PortfolioItem.ObjectID',value:selected_item.get('ObjectID')}],
             listeners: {
                 load: function(store, records, successful) {

@@ -147,6 +147,7 @@ Ext.define('CustomApp', {
         Ext.create('Rally.data.wsapi.Store', {
             model: 'hierarchicalrequirement',
             autoLoad: true,
+            context: { project: null },
             filters: [{ property:'PortfolioItem.ObjectID',value:selected_item.get('ObjectID')}],
             listeners: {
                 load: function(store, records, successful) {
