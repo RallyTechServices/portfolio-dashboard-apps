@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Feb 26 2015 08:13:12 GMT-0800 (PST) -->
+    <!--  Build Date: Thu Feb 26 2015 08:19:00 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Feb 26 2015 08:13:12 GMT-0800 (PST)";
-        var CHECKSUM = 5569374775;
+        var APP_BUILD_DATE = "Thu Feb 26 2015 08:19:00 GMT-0800 (PST)";
+        var CHECKSUM = 5586209125;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -186,7 +186,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         win.document.close();
         
         win.print();
-        //win.close();
+        win.close();
     },
     _buildCardsHTML: function() {
 
@@ -414,17 +414,11 @@ Ext.define('CustomApp', {
                 if ( !value ) {
                     return "";
                 }
-                return record.get('Feature').FormattedID + ":" + record.get('Feature').Name;
-            }
-        },
-        {
-            dataIndex: 'Project',
-            cls: 'cardLowerRight',
-            renderer: function(value,meta_data,record){
-                if ( !value ) {
-                    return "";
-                }
-                return record.get('Project').Parent.Name + "<br/>" + record.get('Project').Name;
+                var feature_string = record.get('Feature').FormattedID + ":" + record.get('Feature').Name;
+                var project_string = record.get('Project').Name;
+                var feature_project_string = record.get('Feature').Project.Name;
+                
+                return [feature_string,project_string,feature_project_string].join('<br/>');
             }
         },
         {

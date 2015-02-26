@@ -178,17 +178,11 @@ Ext.define('CustomApp', {
                 if ( !value ) {
                     return "";
                 }
-                return record.get('Feature').FormattedID + ":" + record.get('Feature').Name;
-            }
-        },
-        {
-            dataIndex: 'Project',
-            cls: 'cardLowerRight',
-            renderer: function(value,meta_data,record){
-                if ( !value ) {
-                    return "";
-                }
-                return record.get('Project').Parent.Name + "<br/>" + record.get('Project').Name;
+                var feature_string = record.get('Feature').FormattedID + ":" + record.get('Feature').Name;
+                var project_string = record.get('Project').Name;
+                var feature_project_string = record.get('Feature').Project.Name;
+                
+                return [feature_string,project_string,feature_project_string].join('<br/>');
             }
         },
         {
