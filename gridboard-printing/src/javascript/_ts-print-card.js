@@ -33,15 +33,13 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         win.document.close();
         
         win.print();
-        
+        //win.close();
     },
     _buildCardsHTML: function() {
 
         var html = '';
         var total_cards = this.records.length; 
         var card_num = 0; 
-
-        console.log('records to print', this.records);
         
         Ext.each(this.records, function(record){
             
@@ -62,10 +60,10 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
             html += Ext.String.format('<div class="artifact">{0}</div>', value_html);
             
             card_num ++; 
-            if ((card_num + 1) % 2 === 0) {
-                html += '<div class=pb></div>';
+            if ((card_num) % 4 === 0) {
+                html += '<div class="pb"></div>';
             } else if (card_num === total_cards - 1) {
-                html += '<div class=cb>&nbsp;</div>';
+                html += '<div class="cb">&nbsp;</div>';
             }
         },this);
         return html;  
