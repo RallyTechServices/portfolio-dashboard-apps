@@ -161,12 +161,32 @@ Ext.define("ReleasePlanningSummary", {
                 
                 meta_data.style = "text-align:right;"
                 return points;
+            }},
+            { text: "Unplanned Points", renderer: function(value,meta_data,record){
+                if ( !record.get('_stories_not_done') ) {
+                    return "N/A";
+                }
+                var points = 0;
+                Ext.Array.each( record.get('_stories_not_done'), function(story) {
+                    var record_points = story.get('PlanEstimate') || 0;
+                    var iteration = story.get('Iteration');
+                    var today_iso = Rally.util.DateTime.toIsoString(new Date());
+                                        
+                    if ( ! iteration ) {
+                        points = points + record_points;
+                    }
+                });
+                
+                meta_data.style = "text-align:right;"
+                return points;
             }}
         ]
         
         this.down('#display_box').add({
             xtype: 'rallygrid',
             store: store,
+            sortableColumns: false,
+            showRowActionsColumn: false,
             columnCfgs: columns
         });
     },

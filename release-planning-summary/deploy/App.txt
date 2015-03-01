@@ -3,11 +3,11 @@
 <head>
     <title>Release Planning Summary</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Sun Mar 01 2015 13:36:42 GMT-0800 (PST) -->
+    <!--  Build Date: Sun Mar 01 2015 13:42:33 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Sun Mar 01 2015 13:36:42 GMT-0800 (PST)";
-        var CHECKSUM = 3560073327;
+        var APP_BUILD_DATE = "Sun Mar 01 2015 13:42:33 GMT-0800 (PST)";
+        var CHECKSUM = 3950739042;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -301,12 +301,32 @@ Ext.define("ReleasePlanningSummary", {
                 
                 meta_data.style = "text-align:right;"
                 return points;
+            }},
+            { text: "Unplanned Points", renderer: function(value,meta_data,record){
+                if ( !record.get('_stories_not_done') ) {
+                    return "N/A";
+                }
+                var points = 0;
+                Ext.Array.each( record.get('_stories_not_done'), function(story) {
+                    var record_points = story.get('PlanEstimate') || 0;
+                    var iteration = story.get('Iteration');
+                    var today_iso = Rally.util.DateTime.toIsoString(new Date());
+                                        
+                    if ( ! iteration ) {
+                        points = points + record_points;
+                    }
+                });
+                
+                meta_data.style = "text-align:right;"
+                return points;
             }}
         ]
         
         this.down('#display_box').add({
             xtype: 'rallygrid',
             store: store,
+            sortableColumns: false,
+            showRowActionsColumn: false,
             columnCfgs: columns
         });
     },
