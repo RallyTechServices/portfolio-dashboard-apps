@@ -128,6 +128,19 @@ Ext.define("ReleasePlanningSummary", {
                 
                 meta_data.style = "text-align:right;"
                 return points;
+            }},
+            { text: "Remaining Points", renderer: function(value,meta_data,record){
+                if ( !record.get('_stories_not_done') ) {
+                    return "N/A";
+                }
+                var points = 0;
+                Ext.Array.each( record.get('_stories_not_done'), function(story) {
+                    var record_points = story.get('PlanEstimate') || 0;
+                    points = points + record_points;
+                });
+                
+                meta_data.style = "text-align:right;"
+                return points;
             }}
         ]
         
@@ -157,6 +170,7 @@ Ext.define("ReleasePlanningSummary", {
             var stories = stories_by_feature[feature.get('FormattedID')];
             feature.set('_stories', stories);
             feature.set('_stories_done', this._getDoneStories(stories));
+            feature.set('_stories_not_done', this._getNotDoneStories(stories));
         },this);
     },
     
@@ -170,5 +184,17 @@ Ext.define("ReleasePlanningSummary", {
             }
         });
         return done_stories;
+    },
+    
+    _getNotDoneStories: function(stories) {
+        // stories that are accepted or completed
+        var not_done_stories = [];
+        Ext.Array.each(stories, function(story) {
+            var schedule_state = story.get('ScheduleState');
+            if ( schedule_state == "Accepted" || schedule_state == "Completed" ) {
+                not_done_stories.push(story);
+            }
+        });
+        return not_done_stories;
     }
 });
