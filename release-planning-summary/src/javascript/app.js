@@ -72,7 +72,7 @@ Ext.define("ReleasePlanningSummary", {
         var deferred = Ext.create('Deft.Deferred');
         var me = this;
         var model_name = 'PortfolioItem/Feature',
-            field_names = ['FormattedID','Name','Release','UserStories','UnEstimatedLeafStoryCount'];
+            field_names = ['FormattedID','Name','Release','UserStories','UnEstimatedLeafStoryCount','LeafStoryPlanEstimateTotal'];
                         
         this.logger.log("Starting load:",filters);
           
@@ -114,7 +114,8 @@ Ext.define("ReleasePlanningSummary", {
                 }
                 return value.Count;
             } },
-            { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories" }
+            { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories" },
+            { dataIndex: "LeafStoryPlanEstimateTotal", text: "Total Points" }
         ]
         
         this.down('#display_box').add({

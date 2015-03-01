@@ -3,11 +3,11 @@
 <head>
     <title>Release Planning Summary</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Sun Mar 01 2015 13:12:07 GMT-0800 (PST) -->
+    <!--  Build Date: Sun Mar 01 2015 13:13:41 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Sun Mar 01 2015 13:12:07 GMT-0800 (PST)";
-        var CHECKSUM = 2416464618;
+        var APP_BUILD_DATE = "Sun Mar 01 2015 13:13:41 GMT-0800 (PST)";
+        var CHECKSUM = 2473624531;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -212,7 +212,7 @@ Ext.define("ReleasePlanningSummary", {
         var deferred = Ext.create('Deft.Deferred');
         var me = this;
         var model_name = 'PortfolioItem/Feature',
-            field_names = ['FormattedID','Name','Release','UserStories','UnEstimatedLeafStoryCount'];
+            field_names = ['FormattedID','Name','Release','UserStories','UnEstimatedLeafStoryCount','LeafStoryPlanEstimateTotal'];
                         
         this.logger.log("Starting load:",filters);
           
@@ -254,7 +254,8 @@ Ext.define("ReleasePlanningSummary", {
                 }
                 return value.Count;
             } },
-            { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories" }
+            { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories" },
+            { dataIndex: "LeafStoryPlanEstimateTotal", text: "Total Points" }
         ]
         
         this.down('#display_box').add({
