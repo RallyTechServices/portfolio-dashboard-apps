@@ -3,11 +3,11 @@
 <head>
     <title>Release Planning Summary</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Sun Mar 01 2015 13:24:21 GMT-0800 (PST) -->
+    <!--  Build Date: Sun Mar 01 2015 13:36:42 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Sun Mar 01 2015 13:24:21 GMT-0800 (PST)";
-        var CHECKSUM = 3190931425;
+        var APP_BUILD_DATE = "Sun Mar 01 2015 13:36:42 GMT-0800 (PST)";
+        var CHECKSUM = 3560073327;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -193,7 +193,8 @@ Ext.define("ReleasePlanningSummary", {
         Ext.create('Rally.data.wsapi.Store', {
             limit:'Infinity',
             model: 'HierarchicalRequirement',
-            fetch: ['FormattedID','PortfolioItem','ScheduleState','PlanEstimate','Iteration','Name'],
+            fetch: ['FormattedID','PortfolioItem','ScheduleState','PlanEstimate','Iteration',
+                'Name', 'StartDate'],
             filters: filters
         }).load({
             callback : function(records, operation, successful) {
@@ -212,7 +213,8 @@ Ext.define("ReleasePlanningSummary", {
         var deferred = Ext.create('Deft.Deferred');
         var me = this;
         var model_name = 'PortfolioItem/Feature',
-            field_names = ['FormattedID','Name','Release','UserStories','UnEstimatedLeafStoryCount','LeafStoryPlanEstimateTotal'];
+            field_names = ['FormattedID','Name','Release','UserStories',
+                'UnEstimatedLeafStoryCount','LeafStoryPlanEstimateTotal'];
                         
         this.logger.log("Starting load:",filters);
           
@@ -241,7 +243,7 @@ Ext.define("ReleasePlanningSummary", {
         this._calculate(store.getRecords(), stories_by_feature);
         
         store.on('load',function(store,records) {
-            this._calculate(records,stories);
+            this._calculate(records,stories_by_feature);
         }, this);
         
         var columns = [
@@ -277,6 +279,24 @@ Ext.define("ReleasePlanningSummary", {
                 Ext.Array.each( record.get('_stories_not_done'), function(story) {
                     var record_points = story.get('PlanEstimate') || 0;
                     points = points + record_points;
+                });
+                
+                meta_data.style = "text-align:right;"
+                return points;
+            }},
+            { text: "Planned Points", renderer: function(value,meta_data,record){
+                if ( !record.get('_stories_not_done') ) {
+                    return "N/A";
+                }
+                var points = 0;
+                Ext.Array.each( record.get('_stories_not_done'), function(story) {
+                    var record_points = story.get('PlanEstimate') || 0;
+                    var iteration = story.get('Iteration');
+                    var today_iso = Rally.util.DateTime.toIsoString(new Date());
+                                        
+                    if ( iteration && iteration.StartDate > today_iso ) {
+                        points = points + record_points;
+                    }
                 });
                 
                 meta_data.style = "text-align:right;"
@@ -319,7 +339,7 @@ Ext.define("ReleasePlanningSummary", {
         var done_stories = [];
         Ext.Array.each(stories, function(story) {
             var schedule_state = story.get('ScheduleState');
-            if ( schedule_state != "Accepted" && schedule_state != "Completed" ) {
+            if ( schedule_state == "Accepted" || schedule_state == "Completed" ) {
                 done_stories.push(story);
             }
         });
@@ -331,7 +351,7 @@ Ext.define("ReleasePlanningSummary", {
         var not_done_stories = [];
         Ext.Array.each(stories, function(story) {
             var schedule_state = story.get('ScheduleState');
-            if ( schedule_state == "Accepted" || schedule_state == "Completed" ) {
+            if ( schedule_state != "Accepted" && schedule_state != "Completed" ) {
                 not_done_stories.push(story);
             }
         });
