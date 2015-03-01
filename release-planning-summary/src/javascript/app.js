@@ -115,7 +115,20 @@ Ext.define("ReleasePlanningSummary", {
                 return value.Count;
             } },
             { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories" },
-            { dataIndex: "LeafStoryPlanEstimateTotal", text: "Total Points" }
+            { dataIndex: "LeafStoryPlanEstimateTotal", text: "Total Points" },
+            { text: "Completed Points", renderer: function(value,meta_data,record){
+                if ( !record.get('_stories_done') ) {
+                    return "N/A";
+                }
+                var points = 0;
+                Ext.Array.each( record.get('_stories_done'), function(story) {
+                    var record_points = story.get('PlanEstimate') || 0;
+                    points = points + record_points;
+                });
+                
+                meta_data.style = "text-align:right;"
+                return points;
+            }}
         ]
         
         this.down('#display_box').add({
@@ -143,18 +156,19 @@ Ext.define("ReleasePlanningSummary", {
         Ext.Array.each(features, function(feature) {
             var stories = stories_by_feature[feature.get('FormattedID')];
             feature.set('_stories', stories);
-            feature.set('_stories_unestimated', this._getUnestimatedStories(stories));
+            feature.set('_stories_done', this._getDoneStories(stories));
         },this);
     },
     
-    _getUnestimatedStories: function(stories) {
-        var unestimated_stories = [];
+    _getDoneStories: function(stories) {
+        // stories that are accepted or completed
+        var done_stories = [];
         Ext.Array.each(stories, function(story) {
-            var plan_estimate = story.get('PlanEstimate');
-            if ( isNaN(plan_estimate) ) {
-                unestimated_stories.push(story);
+            var schedule_state = story.get('ScheduleState');
+            if ( schedule_state != "Accepted" && schedule_state != "Completed" ) {
+                done_stories.push(story);
             }
         });
-        return unestimated_stories;
+        return done_stories;
     }
 });
