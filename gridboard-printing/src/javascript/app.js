@@ -85,8 +85,12 @@ Ext.define('CustomApp', {
                         store: store,
                         columnCfgs: [
                               'Name',
-                              'State',
-                              'Owner'
+                              'Owner',
+                              'Iteration',
+                              'PlanEstimate',
+                              'c_MoSCoW',
+                              'c_PrimaryDevTeam',
+                              'Project'
                         ]
                     },
                     height: this.getHeight()
