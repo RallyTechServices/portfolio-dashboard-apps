@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Feb 26 2015 08:19:00 GMT-0800 (PST) -->
+    <!--  Build Date: Thu Mar 05 2015 20:54:18 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Feb 26 2015 08:19:00 GMT-0800 (PST)";
-        var CHECKSUM = 5586209125;
+        var APP_BUILD_DATE = "Thu Mar 05 2015 20:54:18 GMT-0800 (PST)";
+        var CHECKSUM = 5589986383;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -155,7 +155,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
     logger: new Rally.technicalservices.Logger(),
     truncateText: '...',
     config: {
-        title: 'Blah',
+        title: 'print...',
         records: null,
         styleSheetTitle: "printCards", 
         /**
@@ -534,10 +534,11 @@ Ext.define('CustomApp', {
         }
 
         .cardTitle {
-            font: bold 28px Genova, sans-serif;
-            padding-top: 5em;
+            font: bold 24px Genova, sans-serif;
+            padding-top: 3em;
             text-align: center;
         }
+
 
         .description {
             float: left;

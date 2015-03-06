@@ -2,7 +2,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
     logger: new Rally.technicalservices.Logger(),
     truncateText: '...',
     config: {
-        title: 'Blah',
+        title: 'print...',
         records: null,
         styleSheetTitle: "printCards", 
         /**

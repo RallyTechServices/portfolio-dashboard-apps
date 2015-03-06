@@ -82,10 +82,11 @@
         }
 
         .cardTitle {
-            font: bold 28px Genova, sans-serif;
-            padding-top: 5em;
+            font: bold 24px Genova, sans-serif;
+            padding-top: 3em;
             text-align: center;
         }
+
 
         .description {
             float: left;
