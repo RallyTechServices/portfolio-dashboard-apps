@@ -20,7 +20,10 @@ Ext.define("ReleasePlanningSummary", {
                     var feature_filter = rb.getQueryFromSelected();
                     var me = this;
                     
-                    var story_filter = [{property:'PortfolioItem.Release.Name',value:rb.getRecord().get('Name')}];
+                    var story_filter = [
+                        {property:'Feature.Release.Name',value:rb.getRecord().get('Name')},
+                        {property:'DirectChildrenCount',value:0}
+                    ];
                     
                     Deft.Promise.all([
                         this._getFeatureStore(feature_filter),
@@ -53,8 +56,8 @@ Ext.define("ReleasePlanningSummary", {
         Ext.create('Rally.data.wsapi.Store', {
             limit:'Infinity',
             model: 'HierarchicalRequirement',
-            fetch: ['FormattedID','PortfolioItem','ScheduleState','PlanEstimate','Iteration',
-                'Name', 'StartDate'],
+            fetch: ['FormattedID','Feature','ScheduleState','PlanEstimate','Iteration',
+                'Name', 'StartDate', 'EndDate','Project'],
             filters: filters
         }).load({
             callback : function(records, operation, successful) {
@@ -117,17 +120,25 @@ Ext.define("ReleasePlanningSummary", {
                 return value.Count;
             } },
             { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories" },
-            { dataIndex: "LeafStoryPlanEstimateTotal", text: "Total Points" },
+            { 
+                dataIndex: "LeafStoryPlanEstimateTotal", 
+                text: "Total Points",
+                renderer: function(value,meta_data,record) {
+                    return Ext.util.Format.number(value,'0');
+                }
+            },
             { text: "Completed Points", renderer: function(value,meta_data,record){
+                
                 if ( !record.get('_stories_done') ) {
                     return "N/A";
                 }
+                
                 var points = 0;
                 Ext.Array.each( record.get('_stories_done'), function(story) {
                     var record_points = story.get('PlanEstimate') || 0;
                     points = points + record_points;
                 });
-                
+                                
                 meta_data.style = "text-align:right;"
                 return points;
             }},
@@ -187,14 +198,21 @@ Ext.define("ReleasePlanningSummary", {
             store: store,
             sortableColumns: false,
             showRowActionsColumn: false,
-            columnCfgs: columns
+            columnCfgs: columns,
+            listeners: {
+                itemclick: function(view, record, item, index, evt) {
+                    var column_index = view.getPositionByEvent(evt).column;
+                    this.showDetailPopup(record, column_index);
+                },
+                scope : this
+            }
         });
     },
     _getStoriesByFeature: function(stories) {
         var stories_by_feature = {};
         
         Ext.Array.each(stories,function(story){
-            var feature = story.get('PortfolioItem').FormattedID;
+            var feature = story.get('Feature').FormattedID;
             if ( !stories_by_feature[feature] ) {
                 stories_by_feature[feature] = [];
             }
@@ -211,15 +229,20 @@ Ext.define("ReleasePlanningSummary", {
             feature.set('_stories', stories);
             feature.set('_stories_done', this._getDoneStories(stories));
             feature.set('_stories_not_done', this._getNotDoneStories(stories));
+            
         },this);
     },
     
     _getDoneStories: function(stories) {
         // stories that are accepted or completed
         var done_stories = [];
+        var today_iso = Rally.util.DateTime.toIsoString(new Date());
+        
         Ext.Array.each(stories, function(story) {
             var schedule_state = story.get('ScheduleState');
-            if ( schedule_state == "Accepted" || schedule_state == "Completed" ) {
+            var iteration = story.get('Iteration');
+            
+            if (( schedule_state == "Accepted" || schedule_state == "Completed" ) || ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso )  ) {
                 done_stories.push(story);
             }
         });
@@ -229,12 +252,85 @@ Ext.define("ReleasePlanningSummary", {
     _getNotDoneStories: function(stories) {
         // stories that are accepted or completed
         var not_done_stories = [];
+        var today_iso = Rally.util.DateTime.toIsoString(new Date());
         Ext.Array.each(stories, function(story) {
             var schedule_state = story.get('ScheduleState');
-            if ( schedule_state != "Accepted" && schedule_state != "Completed" ) {
+            var iteration = story.get('Iteration');
+            // first, is it in the current iteration?
+            if ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso ) {
+                // don't keep
+            } else if (( schedule_state != "Accepted" && schedule_state != "Completed" )) {
                 not_done_stories.push(story);
-            }
+            }  
         });
         return not_done_stories;
+    },
+    
+    showDetailPopup: function(record, column_index) {
+        var me = this;
+        if ( column_index ==  1 || column_index > 2 ) {
+            var stories = record.get('_stories');
+            var title = "Stories for " + record.get('Name');
+            
+            var store = Ext.create('Rally.data.custom.Store', {
+                data: stories
+            });
+            
+            Ext.create('Rally.ui.dialog.Dialog', {
+                id        : 'detailPopup',
+                title     : title,
+                width     : Ext.getBody().getWidth() - 25,
+                height    : Ext.getBody().getHeight() - 25,
+                closable  : true,
+                layout    : 'fit',
+                items     : [{
+                    xtype                : 'rallygrid',
+                    sortableColumns      : true,
+                    showRowActionsColumn : false,
+                    showPagingToolbar    : false,
+                    columnCfgs           : [
+                        {
+                            dataIndex : 'FormattedID',
+                            text: "id"
+                        },
+                        {
+                            dataIndex : 'Name',
+                            text: "Name",
+                            flex: 1
+                        },
+                        {
+                            dataIndex : 'Iteration',
+                            text: "Iteration",
+                            renderer: function(value,meta_data,record){
+                                if ( value && value.Name ) {
+                                    return value.Name;
+                                }
+                                return "";
+                            }
+                        },
+                        {
+                            dataIndex: 'ScheduleState',
+                            text: "Schedule State"
+                        },
+                        {
+                            dataIndex: 'PlanEstimate',
+                            text: 'Points',
+                        },
+                        {
+                            dataIndex: 'Project',
+                            text: 'Team',
+                            flex: 1,
+                            renderer: function(value,meta_data,record){
+                                if ( value && value.Name ) {
+                                    return value.Name;
+                                }
+                                return "";
+                            }
+                        }
+                    ],
+                    store : store
+                }]
+            }).show();
+        }
     }
 });
