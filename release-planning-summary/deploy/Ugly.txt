@@ -3,10 +3,10 @@
 <head>
     <title>Release Planning Summary</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Mar 05 2015 18:02:55 GMT-0800 (PST) -->
+    <!--  Build Date: Thu Mar 05 2015 18:19:56 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Mar 05 2015 18:02:55 GMT-0800 (PST)";
+        var APP_BUILD_DATE = "Thu Mar 05 2015 18:19:56 GMT-0800 (PST)";
         var CHECKSUM = [%= checksum %];
     </script>
     
@@ -41,6 +41,11 @@
     margin-right: 5px;
     cursor: pointer;
 }
+
+.x-column-header-align-right .x-column-header-text {
+    margin-right: 0px;
+}
+
     </style>
 
 </head>

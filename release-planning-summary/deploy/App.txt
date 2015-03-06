@@ -3,11 +3,11 @@
 <head>
     <title>Release Planning Summary</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Mar 05 2015 18:02:55 GMT-0800 (PST) -->
+    <!--  Build Date: Thu Mar 05 2015 18:19:56 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Mar 05 2015 18:02:55 GMT-0800 (PST)";
-        var CHECKSUM = 5438402577;
+        var APP_BUILD_DATE = "Thu Mar 05 2015 18:19:56 GMT-0800 (PST)";
+        var CHECKSUM = 5446757875;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -253,13 +253,13 @@ Ext.define("ReleasePlanningSummary", {
             {dataIndex: 'FormattedID', text:'id'},
             {dataIndex: "Name", text: "Name" },
             {dataIndex: "Release", text: "Release" },
-            {dataIndex: "UserStories", text: "Story Count", renderer: function(value,meta_data,record){
+            {dataIndex: "UserStories", text: "Story Count", align: "right", renderer: function(value,meta_data,record){
                 if ( !value ) {
                     return 0;
                 }
                 return value.Count;
             } },
-            { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories" },
+            { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories", align: "right"},
             { 
                 dataIndex: "LeafStoryPlanEstimateTotal", 
                 text: "Total Points",
@@ -267,7 +267,7 @@ Ext.define("ReleasePlanningSummary", {
                     return Ext.util.Format.number(value,'0');
                 }
             },
-            { text: "Completed Points", renderer: function(value,meta_data,record){
+            { text: "Completed Points", align: "right", renderer: function(value,meta_data,record){
                 
                 if ( !record.get('_stories_done') ) {
                     return "N/A";
@@ -279,10 +279,9 @@ Ext.define("ReleasePlanningSummary", {
                     points = points + record_points;
                 });
                                 
-                meta_data.style = "text-align:right;"
                 return points;
             }},
-            { text: "Remaining Points", renderer: function(value,meta_data,record){
+            { text: "Remaining Points", align: "right", renderer: function(value,meta_data,record){
                 if ( !record.get('_stories_not_done') ) {
                     return "N/A";
                 }
@@ -292,10 +291,9 @@ Ext.define("ReleasePlanningSummary", {
                     points = points + record_points;
                 });
                 
-                meta_data.style = "text-align:right;"
                 return points;
             }},
-            { text: "Planned Points", renderer: function(value,meta_data,record){
+            { text: "Planned Points", align: "right", renderer: function(value,meta_data,record){
                 if ( !record.get('_stories_not_done') ) {
                     return "N/A";
                 }
@@ -310,10 +308,9 @@ Ext.define("ReleasePlanningSummary", {
                     }
                 });
                 
-                meta_data.style = "text-align:right;"
                 return points;
             }},
-            { text: "Unplanned Points", renderer: function(value,meta_data,record){
+            { text: "Unplanned Points", align: "right", renderer: function(value,meta_data,record){
                 if ( !record.get('_stories_not_done') ) {
                     return "N/A";
                 }
@@ -328,7 +325,6 @@ Ext.define("ReleasePlanningSummary", {
                     }
                 });
                 
-                meta_data.style = "text-align:right;"
                 return points;
             }}
         ]
@@ -454,7 +450,7 @@ Ext.define("ReleasePlanningSummary", {
                         },
                         {
                             dataIndex: 'PlanEstimate',
-                            text: 'Points',
+                            text: 'Points'
                         },
                         {
                             dataIndex: 'Project',
@@ -501,6 +497,11 @@ Ext.define("ReleasePlanningSummary", {
     margin-right: 5px;
     cursor: pointer;
 }
+
+.x-column-header-align-right .x-column-header-text {
+    margin-right: 0px;
+}
+
     </style>
 
 </head>

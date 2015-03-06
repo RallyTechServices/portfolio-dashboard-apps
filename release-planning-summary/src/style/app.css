@@ -15,3 +15,7 @@
     margin-right: 5px;
     cursor: pointer;
 }
+
+.x-column-header-align-right .x-column-header-text {
+    margin-right: 0px;
+}

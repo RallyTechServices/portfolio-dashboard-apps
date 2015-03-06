@@ -4,7 +4,9 @@ An app to provide a flat grid of information related to features planned into a 
 
 ## Development Notes
 
-If there isn't an available field on the Feature (e.g., UnEstimatedLeafStoryCount), then we're using direct children as the counter for the column.
+* we've hardcoded the field "feature" to get leaves.  to use with a different environment, make this flexible
+
+* 'completed' means 'accepted or completed or in the current sprint'
 
 ### First Load
 

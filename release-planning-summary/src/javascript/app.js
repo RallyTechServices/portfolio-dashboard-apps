@@ -113,13 +113,13 @@ Ext.define("ReleasePlanningSummary", {
             {dataIndex: 'FormattedID', text:'id'},
             {dataIndex: "Name", text: "Name" },
             {dataIndex: "Release", text: "Release" },
-            {dataIndex: "UserStories", text: "Story Count", renderer: function(value,meta_data,record){
+            {dataIndex: "UserStories", text: "Story Count", align: "right", renderer: function(value,meta_data,record){
                 if ( !value ) {
                     return 0;
                 }
                 return value.Count;
             } },
-            { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories" },
+            { dataIndex: "UnEstimatedLeafStoryCount", text: "Unestimated Stories", align: "right"},
             { 
                 dataIndex: "LeafStoryPlanEstimateTotal", 
                 text: "Total Points",
@@ -127,7 +127,7 @@ Ext.define("ReleasePlanningSummary", {
                     return Ext.util.Format.number(value,'0');
                 }
             },
-            { text: "Completed Points", renderer: function(value,meta_data,record){
+            { text: "Completed Points", align: "right", renderer: function(value,meta_data,record){
                 
                 if ( !record.get('_stories_done') ) {
                     return "N/A";
@@ -139,10 +139,9 @@ Ext.define("ReleasePlanningSummary", {
                     points = points + record_points;
                 });
                                 
-                meta_data.style = "text-align:right;"
                 return points;
             }},
-            { text: "Remaining Points", renderer: function(value,meta_data,record){
+            { text: "Remaining Points", align: "right", renderer: function(value,meta_data,record){
                 if ( !record.get('_stories_not_done') ) {
                     return "N/A";
                 }
@@ -152,10 +151,9 @@ Ext.define("ReleasePlanningSummary", {
                     points = points + record_points;
                 });
                 
-                meta_data.style = "text-align:right;"
                 return points;
             }},
-            { text: "Planned Points", renderer: function(value,meta_data,record){
+            { text: "Planned Points", align: "right", renderer: function(value,meta_data,record){
                 if ( !record.get('_stories_not_done') ) {
                     return "N/A";
                 }
@@ -170,10 +168,9 @@ Ext.define("ReleasePlanningSummary", {
                     }
                 });
                 
-                meta_data.style = "text-align:right;"
                 return points;
             }},
-            { text: "Unplanned Points", renderer: function(value,meta_data,record){
+            { text: "Unplanned Points", align: "right", renderer: function(value,meta_data,record){
                 if ( !record.get('_stories_not_done') ) {
                     return "N/A";
                 }
@@ -188,7 +185,6 @@ Ext.define("ReleasePlanningSummary", {
                     }
                 });
                 
-                meta_data.style = "text-align:right;"
                 return points;
             }}
         ]
@@ -314,7 +310,7 @@ Ext.define("ReleasePlanningSummary", {
                         },
                         {
                             dataIndex: 'PlanEstimate',
-                            text: 'Points',
+                            text: 'Points'
                         },
                         {
                             dataIndex: 'Project',
