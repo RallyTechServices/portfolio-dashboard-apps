@@ -13,7 +13,9 @@ Ext.define('CustomApp', {
             models: ['portfolioitem/feature'] ,
             autoLoad: true,
             enableHierarchy: true,
-            fetch: ['c_MoSCoW','Name','ObjectID','Feature','PortfolioItem','FormattedID','Project'],
+            fetch: ['c_MoSCoW','Name','ObjectID','Feature',
+                    'PortfolioItem','FormattedID','Project',
+                    'Iteration','c_PrimaryDevTeam'],
             _getStoreTypePaths: function() {
                 return ['portfolioitem/feature','hierarchicalrequirement'];
             }
@@ -187,7 +189,16 @@ Ext.define('CustomApp', {
         },
         {
             dataIndex: 'PlanEstimate',
-            cls: 'cardUpperRight'
+            cls: 'cardUpperRight',
+            renderer: function(value,meta_data,record){
+                var size = record.get('PlanEstimate');
+                var iteration = record.get('Iteration');
+                var iteration_name = " ";
+                if ( iteration ) {
+                    iteration_name = Ext.util.Format.substr(iteration.Name,0,4);
+                }
+                return size + "  " + iteration_name;
+            }
         },
         {
             dataIndex: 'Name',
