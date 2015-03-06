@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Mar 05 2015 21:14:48 GMT-0800 (PST) -->
+    <!--  Build Date: Thu Mar 05 2015 21:16:10 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Mar 05 2015 21:14:48 GMT-0800 (PST)";
-        var CHECKSUM = 5865043508;
+        var APP_BUILD_DATE = "Thu Mar 05 2015 21:16:10 GMT-0800 (PST)";
+        var CHECKSUM = 5883149828;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -428,6 +428,7 @@ Ext.define('CustomApp', {
             cls: 'cardUpperRight',
             renderer: function(value,meta_data,record){
                 var size = record.get('PlanEstimate');
+                if ( ! size ) { size = ""; }
                 var iteration = record.get('Iteration');
                 var iteration_name = " ";
                 if ( iteration ) {

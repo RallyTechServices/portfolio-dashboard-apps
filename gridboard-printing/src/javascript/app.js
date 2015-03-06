@@ -192,6 +192,7 @@ Ext.define('CustomApp', {
             cls: 'cardUpperRight',
             renderer: function(value,meta_data,record){
                 var size = record.get('PlanEstimate');
+                if ( ! size ) { size = ""; }
                 var iteration = record.get('Iteration');
                 var iteration_name = " ";
                 if ( iteration ) {
