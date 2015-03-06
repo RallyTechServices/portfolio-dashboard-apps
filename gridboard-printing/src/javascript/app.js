@@ -60,9 +60,9 @@ Ext.define('CustomApp', {
                                             scope: this,
                                             success: function(stories){
                                                 this._openPrintCards(stories);
-//                                                Ext.Array.each(stories,function(story){
-//                                                    console.log(story.get('FormattedID'));
-//                                                });
+                                                Ext.Array.each(stories,function(story){
+                                                    console.log(story.get('FormattedID'),story);
+                                                });
                                             },
                                             failure: function(msg) {
                                                 alert(msg);
@@ -163,6 +163,7 @@ Ext.define('CustomApp', {
         });
         return deferred.promise;
     },
+    
     _openPrintCards: function(records){
         
         var fields =[{
@@ -174,14 +175,14 @@ Ext.define('CustomApp', {
             cls: 'cardTopCenter'
         },
         {
-            dataIndex: 'Feature',
+            dataIndex: 'Project',
             cls: 'cardLowerLeft',
             renderer: function(value,meta_data,record){
                 if ( !value ) {
                     return "";
                 }
                 var feature_string = record.get('Feature').FormattedID + ":" + record.get('Feature').Name;
-                var project_string = record.get('Project').Name;
+                var project_string = record.get('Feature').c_PrimaryDevTeam;
                 var feature_project_string = record.get('Feature').Project.Name;
                 
                 return [feature_string,project_string,feature_project_string].join('<br/>');
