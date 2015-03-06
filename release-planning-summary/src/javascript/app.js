@@ -4,21 +4,24 @@ Ext.define("ReleasePlanningSummary", {
     logger: new Rally.technicalservices.Logger(),
     defaults: { margin: 10 },
     items: [
-        {xtype:'container',itemId:'selector_box'},
+        {xtype:'container',itemId:'selector_box',layout: { type: 'hbox'} },
         {xtype:'container',itemId:'display_box'},
         {xtype:'tsinfolink'}
     ],
     launch: function() {
-        this._addReleaseSelector(this.down('#selector_box'));
+        this._addSelectors(this.down('#selector_box'));
     },
-    _addReleaseSelector: function(container) {
-        container.add({
+    _addSelectors: function(container) {
+        container.add(
+        {
             xtype:'rallyreleasecombobox',
             listeners: {
                 scope: this,
                 change: function(rb, new_value, old_value) {
                     var feature_filter = rb.getQueryFromSelected();
                     var me = this;
+                    
+                    this.setLoading("Loading Features and Stories");
                     
                     var story_filter = [
                         {property:'Feature.Release.Name',value:rb.getRecord().get('Name')},
@@ -33,8 +36,10 @@ Ext.define("ReleasePlanningSummary", {
                         success: function(results) {
                             var feature_store = results[0];
                             var stories = results[1];
+                            this.grid_store = feature_store;
+                            this.setLoading(false);
                             
-                            this._displayGrid(feature_store,stories);
+                            this._displayGrid(this.grid_store,stories);
                         },
                         failure: function(error_message){
                             alert(error_message);
@@ -44,7 +49,22 @@ Ext.define("ReleasePlanningSummary", {
                     });
                 }
             }
-        });
+        },
+        {
+            xtype:'component',
+            flex: 1
+        },
+        {
+            xtype:'rallybutton',
+            itemId: 'csv_button',
+            text: 'Export',
+            disabled: true,
+            listeners: {
+                scope: this,
+                click: this._exportToCSV
+            }
+        }
+        );
     },
     
     _getStories: function(filters){
@@ -84,6 +104,7 @@ Ext.define("ReleasePlanningSummary", {
         Ext.create('Rally.data.wsapi.Store', {
             model: model_name,
             fetch: field_names,
+            pageSize: 25,
             filters: filters
         }).load({
             callback : function(records, operation, successful) {
@@ -109,11 +130,12 @@ Ext.define("ReleasePlanningSummary", {
             this._calculate(records,stories_by_feature);
         }, this);
         
-        var columns = [
-            {dataIndex: 'FormattedID', text:'id'},
-            {dataIndex: "Name", text: "Name" },
-            {dataIndex: "Release", text: "Release" },
+        this.columns = [
+            {dataIndex: 'FormattedID', text:'id',_csvIgnoreRender: true},
+            {dataIndex: "Name", text: "Name",_csvIgnoreRender: true },
+            {dataIndex: "Release", text: "Release"},
             {dataIndex: "UserStories", text: "Story Count", align: "right", renderer: function(value,meta_data,record){
+                
                 if ( !value ) {
                     return 0;
                 }
@@ -189,12 +211,12 @@ Ext.define("ReleasePlanningSummary", {
             }}
         ]
         
-        this.down('#display_box').add({
+        this.grid = this.down('#display_box').add({
             xtype: 'rallygrid',
             store: store,
             sortableColumns: false,
             showRowActionsColumn: false,
-            columnCfgs: columns,
+            columnCfgs: this.columns,
             listeners: {
                 itemclick: function(view, record, item, index, evt) {
                     var column_index = view.getPositionByEvent(evt).column;
@@ -203,6 +225,8 @@ Ext.define("ReleasePlanningSummary", {
                 scope : this
             }
         });
+        
+        this.down('#csv_button').setDisabled(false);
     },
     _getStoriesByFeature: function(stories) {
         var stories_by_feature = {};
@@ -328,5 +352,17 @@ Ext.define("ReleasePlanningSummary", {
                 }]
             }).show();
         }
+    },
+    
+    _exportToCSV: function() {
+        this.setLoading(true);
+        Rally.technicalservices.FileUtilities.getCSVFromGrid(this.grid).then({
+            scope: this,
+            success: function(csv) {
+                this.setLoading(false);
+                Rally.technicalservices.FileUtilities.saveTextAsFile(csv, 'export.csv',{type:'text/csv;charset=utf-8'})
+            }
+        });
     }
+    
 });
