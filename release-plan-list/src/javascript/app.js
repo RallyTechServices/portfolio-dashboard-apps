@@ -141,6 +141,8 @@ Ext.define("ReleasePlanList", {
                         var fid = record.get('FormattedID');
                         record.set('_complete_by_count_percent', me._getCompletePercent(stories_by_feature[fid], 'count'));
                         record.set('_complete_by_points_percent', me._getCompletePercent(stories_by_feature[fid], 'points'));
+                        record.set('_accepted_by_count_percent', me._getAcceptedPercent(stories_by_feature[fid], 'count'));
+                        record.set('_accepted_by_points_percent', me._getAcceptedPercent(stories_by_feature[fid], 'points'));
                         
                     });
                     
@@ -171,7 +173,7 @@ Ext.define("ReleasePlanList", {
                 total = total + added_value;
             }
             
-            if ( story.get('ScheduleState') == 'Complete' || story.get('ScheduleState') == 'Accepted' ) {
+            if ( story.get('ScheduleState') == 'Completed' || story.get('ScheduleState') == 'Accepted' ) {
                 complete = complete + added_value;
             }
         });
@@ -184,6 +186,36 @@ Ext.define("ReleasePlanList", {
         
     },
     
+    _getAcceptedPercent: function(stories, metric) {
+        if ( ! stories ) {
+            return "N/A";
+        }
+        var complete = 0;
+        var total = stories.length;
+        
+        if ( metric != 'count' ) {
+            total = 0;
+        }
+        
+        Ext.Array.each(stories,function(story){
+            var added_value = 1;
+            if ( metric != 'count' ) {
+                added_value = story.get('PlanEstimate') || 0;
+                total = total + added_value;
+            }
+            
+            if ( story.get('ScheduleState') == 'Accepted' ) {
+                complete = complete + added_value;
+            }
+        });
+        
+        if ( total == 0 ) {
+            return "n/a";
+        }
+        
+        return Math.floor( 100*complete/total ) + "%";
+        
+    },
     _displayGrids: function(feature_store, story_store){
         this.down('#display_box').removeAll();
         this._displayGrid(feature_store, this._getFeatureColumns());
@@ -223,6 +255,12 @@ Ext.define("ReleasePlanList", {
             }, align:'right'},
             {                             text: '% Complete by Points', renderer: function(value,meta_data,record) {
                 return record.get('_complete_by_points_percent');
+            }, align:'right'},
+            {                             text: '% Accepted by Count', renderer: function(value,meta_data,record) {
+                return record.get('_accepted_by_count_percent');
+            }, align:'right'},
+            {                             text: '% Accepted by Points', renderer: function(value,meta_data,record) {
+                return record.get('_accepted_by_points_percent');
             }, align:'right'}
         ]
         return columns;
