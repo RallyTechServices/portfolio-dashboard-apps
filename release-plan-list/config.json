@@ -1,0 +1,7 @@
+{
+    "name": "Release Plan List",
+    "className": "ReleasePlanList",
+    "server": "https://audemo.rallydev.com",
+    "sdk": "2.0",
+    "apiKey": "_PUT_APIKEY_HERE_"
+}

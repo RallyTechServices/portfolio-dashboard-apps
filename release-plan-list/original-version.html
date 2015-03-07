@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+** This software is provided as an example only, without guarantee or warranty.  
+** (c) 2010-2014 Rally Software Development Corp.  All rights reserved.
+** Note: This software is unsupported, and uses APIs and other SDK modules that have been or may be deprecated.  
+** This software may cease to function at any time without further notice
+
+** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+** IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+** FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+** COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+** IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+** CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+		<meta name="Name" content="App: Release Planning" />
+		<meta name="Author" content="Chuck Bedekovich" />
+    <meta name="Version" content="2014.9.2" />
+    <meta name="Vendor" content="Rally Software" />
+
+<title>Release Plan</title>
+
+    <script type="text/javascript" src="/apps/1.33/sdk.js?apiVersion=1.43"></script>
+    <script type="text/javascript" src="/apps/2.0rc2/sdk.js"></script>
+
+    <script type="text/javascript">
+    	
+		var rallyDataSource = null;
+		var relDropdown = null;
+		var relStart = null;
+		var relEnd = null;
+		var relDays = 0;
+		var tableFeatures = null;
+		var tableStories = null;
+		var daysGone = 0;
+		var pctGone = 0;
+		var rex = /(\d{4})-(\d{2})-(\d{2})/;	
+    var queryObjectArr = [];	
+    
+ 		var tableFeaturesConfig = {
+			columnKeys : ['Col0','Col1','Col2','Col4','ColB','Col3','Col5','Col6','Col7','ColC','Col8','Col9','ColA'],
+			columnHeaders : ['Rank','ID','Name','Leaf Story Plan Estimate Total','Cumulative Points','Leaf Story Count','UnEstimated Leaf Story Count','Project','State','Ready','Owner','Planned Start Date','Planned End Date']
+//			columnKeys : ['Rank','FormattedID','Name','LeafStoryCount','LeafStoryPlanEstimateTotal','UnEstimatedLeafStoryCount','Project.Name','State.Name','Owner._refObjectName','PlannedStartDate','PlannedEndDate'],
+//			columnWidths : ['180px', '60px', '80px'],
+		};
+		
+		var tableStoriesConfig = {
+			columnKeys : ['Feature.FormattedID','Feature.Name','FormattedID','Name','Release.Name','Iteration.Name','Project.Name','PlanEstimate','ScheduleState','Owner._refObjectName','Predecessors.length','Successors.length'],
+			columnHeaders : ['Feature ID','Feature Name','Story ID','Name','Release','Iteration','Project/Team','Plan Estimate','Schedule State','Owner','# of Predecessors','# of Successors']
+//			columnWidths : ['60px', '240px', '60px', '160px' ],
+		};    
+
+    var APP_TYPE = 'Release';
+        var START_DATE_NAME = "ReleaseStartDate";
+        var END_DATE_NAME = "ReleaseDate";
+        var ESTIMATE_UNIT_NAME = 'ReleaseEstimateUnitName';
+		var UTC_TO_LOCAL_OFFSET = -8;
+		
+		// Adjusts query bounds back to WSAPI 1.29 Start/End specifications
+		function adjustQueryBounds(inputDateString, type) {
+		
+			if (type === "start") {
+				mmss_string = ":00:00Z";
+			} else {
+				mmss_string = ":59:59Z";
+			}		
+			adjustor = Math.abs(UTC_TO_LOCAL_OFFSET).toString();
+
+			if (adjustor.length === 1) {
+				adjustor = "0" + adjustor;
+			}			
+			adjustmentISO = "T" + adjustor + mmss_string;
+			return inputDateString + adjustmentISO;
+		}
+
+		function workingDaysBetweenDates(startDate, endDate) {
+		  
+		    // Validate input
+		    if (endDate < startDate)
+		        return 0;
+		    
+		    // Calculate days between dates
+		    var millisecondsPerDay = 86400 * 1000; // Day in milliseconds
+		    startDate.setHours(0,0,0,1);  // Start just after midnight
+		    endDate.setHours(23,59,59,999);  // End just before midnight
+		    var diff = endDate - startDate;  // Milliseconds between datetime objects    
+		    var days = Math.ceil(diff / millisecondsPerDay);
+		    
+		    // Subtract two weekend days for every week in between
+		    var weeks = Math.floor(days / 7);
+		    var days = days - (weeks * 2);
+		
+		    // Handle special cases
+		    var startDay = startDate.getDay();
+		    var endDay = endDate.getDay();
+		    
+		    // Remove weekend not previously removed.   
+		    if (startDay - endDay > 1)         
+		        days = days - 2;      
+		    
+		    // Remove start day if span starts on Sunday but ends before Saturday
+		    if (startDay == 0 && endDay != 6)
+		        days = days - 1  
+		            
+		    // Remove end day if span ends on Saturday but starts after Sunday
+		    if (endDay == 6 && startDay != 0)
+		        days = days - 1  
+		    
+		    return days;
+		}
+        
+	function showUserStoriesTable(results) {
+    relStart = new Date(adjustQueryBounds(relDropdown.getSelectedStart(), "start"));
+    relEnd = new Date(adjustQueryBounds(relDropdown.getSelectedEnd(), "end"));
+    
+    relDays = workingDaysBetweenDates(relStart, relEnd);
+    daysGone = workingDaysBetweenDates(relStart, new Date());
+    pctGone = Math.round((daysGone / relDays)*100*100)/100;
+		var totStories = totPoints = 0;	
+						        		
+		var arrProjectName = new Array();
+
+		tableFeatures = new rally.sdk.ui.Table(tableFeaturesConfig);		
+		tableStories = new rally.sdk.ui.Table(tableStoriesConfig);
+ 
+ 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	
+//		tableFeatures.addRows(results.features);
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		var cumPoints = 0;
+//		console.log(results.features.length);				
+		for (var i=0; i < results.features.length; i++) {
+
+		console.log(results.features[i].FormattedID, results.features[i].PlannedStartDate, results.features[i].PlannedEndDate);
+
+			var objFeatureRecord = new Object();;
+			var arrFeatureRow = new Array();
+			
+			objFeatureRecord.Col0 = i+1;
+			objFeatureRecord.Col1 = results.features[i].FormattedID;
+			objFeatureRecord.Col2 = results.features[i].Name;
+			objFeatureRecord.Col3 = results.features[i].LeafStoryCount;
+			objFeatureRecord.Col4 = results.features[i].LeafStoryPlanEstimateTotal;
+			objFeatureRecord.Col5 = results.features[i].UnEstimatedLeafStoryCount;
+			objFeatureRecord.Col6 = results.features[i].Project.Name;
+			if (results.features[i].State != null) {
+				objFeatureRecord.Col7 = results.features[i].State.Name;
+			} else {objFeatureRecord.Col7 = "No Entry";}
+			objFeatureRecord.Col8 = results.features[i].Owner._refObjectName;
+			if (results.features[i].PlannedStartDate == null) {
+				objFeatureRecord.Col9 = "";
+			} else {objFeatureRecord.Col9 = results.features[i].PlannedStartDate.slice(0,10);}
+			if (results.features[i].PlannedEndDate == null) {
+				objFeatureRecord.ColA = "";
+			} else {objFeatureRecord.ColA = results.features[i].PlannedEndDate.slice(0,10);}
+			objFeatureRecord.ColB = cumPoints += results.features[i].LeafStoryPlanEstimateTotal;
+			if (results.features[i].Ready) {
+				objFeatureRecord.ColC = '<font color = "green"><b>YES</b></font>';
+			} else {
+			objFeatureRecord.ColC = "";}
+			
+			arrFeatureRow.push(objFeatureRecord);
+			tableFeatures.addRows(arrFeatureRow);
+			
+//			console.log(results.features[i].FormattedID);
+//			console.log(results.features[i]);
+//			console.log(objFeatureRecord);
+//			console.log(arrFeatureRow);
+			
+//			console.log(results.features[i].UserStories.length);			
+//			console.log(results.features[i].UserStories);
+				
+			tableStories.addRows(results.features[i].UserStories);
+		}
+
+//				console.log(totStories, totPoints);
+
+//	console.log(queryObjectArr[0]);
+		
+		tableFeatures.display(document.getElementById('features'));
+		tableStories.display(document.getElementById('stories'));
+
+//		for (var i=0; i < results.features.length; i++) {
+//			tableDetail.addRows(results.features[i].UserStories);
+//			console.log(results.features[i].UserStories);
+//		}
+	}
+
+	function onReleaseSelected() {
+		if(tableFeatures) {
+			tableFeatures.destroy();
+		}
+		if(tableStories) {
+			tableStories.destroy();
+		}
+		
+//    var queryObjectArr = [];
+		queryObjectArr[0] = {
+			type : 'portfolioitem',
+			key : 'features',
+			fetch: 'Rank,FormattedID,Name,LeafStoryCount,LeafStoryPlanEstimateTotal,UnEstimatedLeafStoryCount,State,Ready,PlannedStartDate,PlannedEndDate,UserStories,Feature,Iteration,ScheduleState,PlanEstimate,Predecessors,Successors,Project,Release,Owner',
+			query: '(Release.Name = "' + relDropdown.getSelectedName() + '")',
+			order: 'Rank'
+		};
+		queryObjectArr[1] = {
+			type : 'release',
+			key : 'releases',
+			fetch: 'Name,PlannedVelocity,ReleaseStartDate,ReleaseDate',
+			query: '(Name = "' + relDropdown.getSelectedName() + '")'
+		};
+		
+		rallyDataSource.findAll(queryObjectArr, showUserStoriesTable);
+	}
+
+	function onLoad() {
+		rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
+																												'__PROJECT_OID__',
+																												'__PROJECT_SCOPING_UP__',
+																												'__PROJECT_SCOPING_DOWN__');
+
+		var relConfig = {
+				width: 200
+				};
+			relDropdown = new rally.sdk.ui.ReleaseDropdown(relConfig, rallyDataSource);
+			relDropdown.display(document.getElementById("releaseDiv"), onReleaseSelected);
+		}
+
+		rally.addOnLoad(onLoad);
+
+</script>
+
+</head>
+	<body>
+		<div id="releaseDiv"></div>
+		<br/><br/>
+		<div id="stories"</div>
+		<br/><br/>
+		<div id="features"></div>
+		<br/>
+	</body>
+</html>
