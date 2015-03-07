@@ -3,11 +3,11 @@
 <head>
     <title>Release Plan List</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Fri Mar 06 2015 16:36:05 GMT-0800 (PST) -->
+    <!--  Build Date: Fri Mar 06 2015 17:02:53 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Fri Mar 06 2015 16:36:05 GMT-0800 (PST)";
-        var CHECKSUM = 3137986437;
+        var APP_BUILD_DATE = "Fri Mar 06 2015 17:02:53 GMT-0800 (PST)";
+        var CHECKSUM = 3961200812;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -176,10 +176,14 @@ Ext.define("ReleasePlanList", {
                         {property:'DirectChildrenCount',value:0}
                     ];
                     
-                    Deft.Promise.all([
-                        this._getFeatureStore(feature_filter),
-                        this._getStoryStore(story_filter)
-                    ]).then({
+                    Deft.Chain.pipeline([
+                        function() { 
+                            return this._getStoryStore(story_filter);
+                        },
+                        function(story_store) {
+                            return this._getFeatureStore(feature_filter,story_store);
+                        }
+                    ],this).then({
                         scope: this,
                         success: function(results) {
                             this.setLoading('Creating Grids');
@@ -219,6 +223,7 @@ Ext.define("ReleasePlanList", {
         }).load({
             callback : function(records, operation, successful) {
                 if (successful){
+                    console.log(this);
                     deferred.resolve(this);
                 } else {
                     me.logger.log("Failed: ", operation);
@@ -229,10 +234,24 @@ Ext.define("ReleasePlanList", {
         return deferred.promise;
     },
     
-    _getFeatureStore: function(filters){
+    _getFeatureStore: function(filters,story_store){
         var deferred = Ext.create('Deft.Deferred');
         var me = this;
         var model_name = 'PortfolioItem/Feature';
+        this.logger.log('_getFeatureStore',filters,story_store);
+        
+        var stories_by_feature = {};
+        Ext.Array.each(story_store.getRecords(),function(story){
+            var feature = story.get('Feature');
+            if ( feature ) {
+                var fid = feature.FormattedID;
+                if ( !stories_by_feature[fid] ) {
+                    stories_by_feature[fid] = [];
+                }
+                stories_by_feature[fid].push(story);
+            }
+        });
+        
         
         var field_names = [];
         
@@ -258,8 +277,13 @@ Ext.define("ReleasePlanList", {
                         var current_plan_estimate = record.get('LeafStoryPlanEstimateTotal') || 0;
                         current_cumulative = current_cumulative + current_plan_estimate;
                         record.set('_cumulative', current_cumulative);
+                        
+                        var fid = record.get('FormattedID');
+                        record.set('_complete_by_count_percent', me._getCompletePercent(stories_by_feature[fid], 'count'));
+                        
                     });
-                    deferred.resolve(this);
+                    
+                    deferred.resolve([this,story_store]);
                 } else {
                     me.logger.log("Failed: ", operation);
                     deferred.reject('Problem loading: ' + operation.error.errors.join('. '));
@@ -268,7 +292,32 @@ Ext.define("ReleasePlanList", {
         });
         return deferred.promise;
     },
-    
+    _getCompletePercent: function(stories, metric) {
+        if ( ! stories ) {
+            return "N/A";
+        }
+        var complete = 0;
+        var total = stories.length;
+        
+        Ext.Array.each(stories,function(story){
+            var added_value = 1;
+            
+            if ( story.get('ScheduleState') == 'Complete' || story.get('ScheduleState') == 'Accepted' ) {
+                complete = complete + added_value;
+            }
+            
+//            if ( metric == 'count' ) {
+//                
+//            }
+        });
+        
+        if ( total == 0 ) {
+            return "n/a";
+        }
+        
+        return Math.floor( 100*complete/total ) + "%";
+        
+    },
     _displayGrids: function(feature_store, story_store){
         this.down('#display_box').removeAll();
         this._displayGrid(feature_store, this._getFeatureColumns());
@@ -302,7 +351,10 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'Ready', text: 'Ready' },
             {dataIndex: 'Owner', text:'Owner' },
             {dataIndex: 'PlannedStartDate', text: 'Planned Start' },
-            {dataIndex: 'PlannedEndDate', text: 'Planned End' }
+            {dataIndex: 'PlannedEndDate', text: 'Planned End' },
+            {                             text: '% Complete by Count', renderer: function(value,meta_data,record) {
+                return record.get('_complete_by_count_percent');
+            }}
         ]
         return columns;
     },
