@@ -3,11 +3,11 @@
 <head>
     <title>Release Plan List</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Fri Mar 06 2015 17:02:53 GMT-0800 (PST) -->
+    <!--  Build Date: Fri Mar 06 2015 18:15:56 GMT-0800 (PST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Fri Mar 06 2015 17:02:53 GMT-0800 (PST)";
-        var CHECKSUM = 3961200812;
+        var APP_BUILD_DATE = "Fri Mar 06 2015 18:15:56 GMT-0800 (PST)";
+        var CHECKSUM = 4239213520;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -160,7 +160,7 @@ Ext.define("ReleasePlanList", {
             field: 'c_RequestedRelease',
             stateful: true,
             stateId: 'rally.technicalservices.featureplanning.requestedrelease',
-            stateEvents: ['change','setvalue'],
+            stateEvents: ['change'],
             listeners: {
                 scope: this,
                 change: function(cb) {
@@ -280,6 +280,7 @@ Ext.define("ReleasePlanList", {
                         
                         var fid = record.get('FormattedID');
                         record.set('_complete_by_count_percent', me._getCompletePercent(stories_by_feature[fid], 'count'));
+                        record.set('_complete_by_points_percent', me._getCompletePercent(stories_by_feature[fid], 'points'));
                         
                     });
                     
@@ -299,16 +300,20 @@ Ext.define("ReleasePlanList", {
         var complete = 0;
         var total = stories.length;
         
+        if ( metric != 'count' ) {
+            total = 0;
+        }
+        
         Ext.Array.each(stories,function(story){
             var added_value = 1;
+            if ( metric != 'count' ) {
+                added_value = story.get('PlanEstimate') || 0;
+                total = total + added_value;
+            }
             
             if ( story.get('ScheduleState') == 'Complete' || story.get('ScheduleState') == 'Accepted' ) {
                 complete = complete + added_value;
             }
-            
-//            if ( metric == 'count' ) {
-//                
-//            }
         });
         
         if ( total == 0 ) {
@@ -318,6 +323,7 @@ Ext.define("ReleasePlanList", {
         return Math.floor( 100*complete/total ) + "%";
         
     },
+    
     _displayGrids: function(feature_store, story_store){
         this.down('#display_box').removeAll();
         this._displayGrid(feature_store, this._getFeatureColumns());
@@ -354,7 +360,10 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'PlannedEndDate', text: 'Planned End' },
             {                             text: '% Complete by Count', renderer: function(value,meta_data,record) {
                 return record.get('_complete_by_count_percent');
-            }}
+            }, align:'right'},
+            {                             text: '% Complete by Points', renderer: function(value,meta_data,record) {
+                return record.get('_complete_by_points_percent');
+            }, align:'right'}
         ]
         return columns;
     },

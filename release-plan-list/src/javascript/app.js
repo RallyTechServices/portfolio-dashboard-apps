@@ -20,7 +20,7 @@ Ext.define("ReleasePlanList", {
             field: 'c_RequestedRelease',
             stateful: true,
             stateId: 'rally.technicalservices.featureplanning.requestedrelease',
-            stateEvents: ['change','setvalue'],
+            stateEvents: ['change'],
             listeners: {
                 scope: this,
                 change: function(cb) {
@@ -140,6 +140,7 @@ Ext.define("ReleasePlanList", {
                         
                         var fid = record.get('FormattedID');
                         record.set('_complete_by_count_percent', me._getCompletePercent(stories_by_feature[fid], 'count'));
+                        record.set('_complete_by_points_percent', me._getCompletePercent(stories_by_feature[fid], 'points'));
                         
                     });
                     
@@ -159,16 +160,20 @@ Ext.define("ReleasePlanList", {
         var complete = 0;
         var total = stories.length;
         
+        if ( metric != 'count' ) {
+            total = 0;
+        }
+        
         Ext.Array.each(stories,function(story){
             var added_value = 1;
+            if ( metric != 'count' ) {
+                added_value = story.get('PlanEstimate') || 0;
+                total = total + added_value;
+            }
             
             if ( story.get('ScheduleState') == 'Complete' || story.get('ScheduleState') == 'Accepted' ) {
                 complete = complete + added_value;
             }
-            
-//            if ( metric == 'count' ) {
-//                
-//            }
         });
         
         if ( total == 0 ) {
@@ -178,6 +183,7 @@ Ext.define("ReleasePlanList", {
         return Math.floor( 100*complete/total ) + "%";
         
     },
+    
     _displayGrids: function(feature_store, story_store){
         this.down('#display_box').removeAll();
         this._displayGrid(feature_store, this._getFeatureColumns());
@@ -214,7 +220,10 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'PlannedEndDate', text: 'Planned End' },
             {                             text: '% Complete by Count', renderer: function(value,meta_data,record) {
                 return record.get('_complete_by_count_percent');
-            }}
+            }, align:'right'},
+            {                             text: '% Complete by Points', renderer: function(value,meta_data,record) {
+                return record.get('_complete_by_points_percent');
+            }, align:'right'}
         ]
         return columns;
     },
