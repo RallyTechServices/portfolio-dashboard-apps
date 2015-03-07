@@ -187,6 +187,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release',text: 'Release'},
             {dataIndex: 'Iteration', text: 'Iteration' },
+            {dataIndex: 'c_MoSCoW', text: 'MoSCoW' },
             {dataIndex: 'Project', text: 'Project' },
             {dataIndex: 'PlanEstimate', text: 'Plan Estimate' },
             {dataIndex: 'ScheduleState', text: 'Schedule State' },
