@@ -60,9 +60,9 @@ Ext.define('CustomApp', {
                                             scope: this,
                                             success: function(stories){
                                                 this._openPrintCards(stories);
-                                                Ext.Array.each(stories,function(story){
-                                                    console.log(story.get('FormattedID'),story);
-                                                });
+//                                                Ext.Array.each(stories,function(story){
+//                                                    console.log(story.get('FormattedID'),story);
+//                                                });
                                             },
                                             failure: function(msg) {
                                                 alert(msg);
@@ -185,7 +185,7 @@ Ext.define('CustomApp', {
                 if ( !value ) {
                     return "";
                 }
-                var feature_string = record.get('Feature').FormattedID + ":" + record.get('Feature').Name;
+                var feature_string = record.get('Feature').FormattedID + ":  " + record.get('Feature').Name;
                 var project_string = record.get('Feature').c_PrimaryDevTeam;
                 var feature_project_string = record.get('Feature').Project.Name;
                 
