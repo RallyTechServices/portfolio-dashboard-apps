@@ -77,7 +77,7 @@ Ext.define("ReleasePlanningSummary", {
             limit:'Infinity',
             model: 'HierarchicalRequirement',
             fetch: ['FormattedID','Feature','ScheduleState','PlanEstimate','Iteration',
-                'Name', 'StartDate', 'EndDate','Project'],
+                'Name', 'StartDate', 'EndDate','Project','c_RequestedRelease'],
             filters: filters
         }).load({
             callback : function(records, operation, successful) {
@@ -97,7 +97,8 @@ Ext.define("ReleasePlanningSummary", {
         var me = this;
         var model_name = 'PortfolioItem/Feature',
             field_names = ['FormattedID','Name','Release','UserStories',
-                'UnEstimatedLeafStoryCount','LeafStoryPlanEstimateTotal'];
+                'UnEstimatedLeafStoryCount','LeafStoryPlanEstimateTotal',
+                'c_RequestedRelease'];
                         
         this.logger.log("Starting load:",filters);
           
@@ -133,6 +134,7 @@ Ext.define("ReleasePlanningSummary", {
         this.columns = [
             {dataIndex: 'FormattedID', text:'id',_csvIgnoreRender: true},
             {dataIndex: "Name", text: "Name",_csvIgnoreRender: true },
+            {dataIndex: "c_RequestedRelease", text: "Requested Release"},
             {dataIndex: "Release", text: "Release"},
             {dataIndex: "UserStories", text: "Story Count", align: "right", renderer: function(value,meta_data,record){
                 

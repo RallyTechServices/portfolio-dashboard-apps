@@ -80,7 +80,7 @@ Ext.define('Rally.technicalservices.FileUtilities', {
         var csv = [];
         
         Ext.Array.each(columns,function(column){
-            if ( column.dataIndex ) {
+            if ( column.dataIndex || column.renderer ) {
                 column_names.push(column.dataIndex);
                 if ( column.csvText ) {
                     headers.push(column.csvText);

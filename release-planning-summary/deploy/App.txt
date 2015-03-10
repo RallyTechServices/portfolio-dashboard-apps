@@ -3,11 +3,11 @@
 <head>
     <title>Release Planning Summary</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Mar 09 2015 12:56:13 GMT-0700 (PDT) -->
+    <!--  Build Date: Mon Mar 09 2015 18:14:32 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Mar 09 2015 12:56:13 GMT-0700 (PDT)";
-        var CHECKSUM = 10111435840;
+        var APP_BUILD_DATE = "Mon Mar 09 2015 18:14:32 GMT-0700 (PDT)";
+        var CHECKSUM = 10271315588;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -220,7 +220,7 @@ Ext.define('Rally.technicalservices.FileUtilities', {
         var csv = [];
         
         Ext.Array.each(columns,function(column){
-            if ( column.dataIndex ) {
+            if ( column.dataIndex || column.renderer ) {
                 column_names.push(column.dataIndex);
                 if ( column.csvText ) {
                     headers.push(column.csvText);
@@ -366,7 +366,7 @@ Ext.define("ReleasePlanningSummary", {
             limit:'Infinity',
             model: 'HierarchicalRequirement',
             fetch: ['FormattedID','Feature','ScheduleState','PlanEstimate','Iteration',
-                'Name', 'StartDate', 'EndDate','Project'],
+                'Name', 'StartDate', 'EndDate','Project','c_RequestedRelease'],
             filters: filters
         }).load({
             callback : function(records, operation, successful) {
@@ -386,7 +386,8 @@ Ext.define("ReleasePlanningSummary", {
         var me = this;
         var model_name = 'PortfolioItem/Feature',
             field_names = ['FormattedID','Name','Release','UserStories',
-                'UnEstimatedLeafStoryCount','LeafStoryPlanEstimateTotal'];
+                'UnEstimatedLeafStoryCount','LeafStoryPlanEstimateTotal',
+                'c_RequestedRelease'];
                         
         this.logger.log("Starting load:",filters);
           
@@ -422,6 +423,7 @@ Ext.define("ReleasePlanningSummary", {
         this.columns = [
             {dataIndex: 'FormattedID', text:'id',_csvIgnoreRender: true},
             {dataIndex: "Name", text: "Name",_csvIgnoreRender: true },
+            {dataIndex: "c_RequestedRelease", text: "Requested Release"},
             {dataIndex: "Release", text: "Release"},
             {dataIndex: "UserStories", text: "Story Count", align: "right", renderer: function(value,meta_data,record){
                 

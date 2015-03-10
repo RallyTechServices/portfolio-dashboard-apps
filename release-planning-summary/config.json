@@ -1,7 +1,7 @@
 {
     "name": "Release Planning Summary",
     "className": "ReleasePlanningSummary",
-    "server": "https://rally1.rallydev.com",
+    "server": "https://audemo.rallydev.com",
     "sdk": "2.0",
     "apiKey": "_PUT_APIKEY_HERE_"
 }
