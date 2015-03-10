@@ -3,10 +3,10 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Mar 09 2015 13:48:19 GMT-0700 (PDT) -->
+    <!--  Build Date: Mon Mar 09 2015 18:00:37 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Mar 09 2015 13:48:19 GMT-0700 (PDT)";
+        var APP_BUILD_DATE = "Mon Mar 09 2015 18:00:37 GMT-0700 (PDT)";
         var CHECKSUM = [%= checksum %];
     </script>
     
@@ -55,11 +55,10 @@
             }
         }
 
-.pb {
+        .pb {
                 page-break-after: always;
                 clear: both;
             }
-            
         #buttonDiv,
         #iterationDropdown {
             display: inline;
@@ -113,7 +112,6 @@
             text-align: center;
         }
 
-
         .description {
             float: left;
             font: 12pt Georgia, sans-serif;
@@ -126,18 +124,34 @@
         }
 
         .cardUpperRight {
-            float: right;
+            text-align: right;
             font: bold 20px Arial, Helvetica, sans-serif;
-            margin-right: 0.3em;
-            margin-top: 0.3em;
-            display: inline-block;
+            top: 0.5em;
+            right: 0.5em;
+            position: absolute;
         }
 
-        .cardUpperLeft {
-            float: left;
+       .cardUpperInnerLeft {
+            text-align: center;
             font: bold 20px Arial, Helvetica, sans-serif;
-            margin-left: 0.25em;
-            margin-top: 0.3em;
+            top: 0.5em;
+            left: 4.0em;
+            width: 6.0em;
+            position: absolute;
+        }
+        .cardUpperInnerRight {
+            text-align: center;
+            font: bold 20px Arial, Helvetica, sans-serif;
+            top: 0.5em;
+            right: 4.0em;
+            width: 6.0em;
+            position: absolute;
+        }
+        .cardUpperLeft {
+            position: absolute;
+            font: bold 20px Arial, Helvetica, sans-serif;
+            top: 0.5em;
+            left: 0.5em;
         }
 
         .cardLowerLeft {
@@ -152,10 +166,13 @@
             right: 0.5em;
         }
 
-        .cardTopCenter {
+        .cardUpperCenter {
+            font: bold 20px Arial, Helvetica, sans-serif;
             text-align: center;
+            top: 0.5em;
             position: absolute;
             right: 0.5in;
+            display: inline;
             width: 3in;
         }
         

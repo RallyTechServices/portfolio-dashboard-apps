@@ -33,7 +33,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         win.document.close();
         
         win.print();
-        win.close();
+        //win.close();
     },
     _buildCardsHTML: function() {
 

@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Mar 09 2015 13:48:19 GMT-0700 (PDT) -->
+    <!--  Build Date: Mon Mar 09 2015 18:00:37 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Mar 09 2015 13:48:19 GMT-0700 (PDT)";
-        var CHECKSUM = 5961245642;
+        var APP_BUILD_DATE = "Mon Mar 09 2015 18:00:37 GMT-0700 (PDT)";
+        var CHECKSUM = 6452752987;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -186,7 +186,7 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
         win.document.close();
         
         win.print();
-        win.close();
+        //win.close();
     },
     _buildCardsHTML: function() {
 
@@ -411,8 +411,33 @@ Ext.define('CustomApp', {
             cls: 'cardUpperLeft'
         },
         {
+            dataIndex: 'PlanEstimate',
+            cls: 'cardUpperInnerRight',
+            renderer: function(value,meta_data,record){
+                if ( ! value ) { value = ""; }
+                return value;
+            }
+        },
+        {
             dataIndex: 'c_MoSCoW',
-            cls: 'cardTopCenter'
+            cls: 'cardUpperInnerLeft',
+            renderer: function(value,meta_data,record){
+                if ( ! value ) { value = ""; }
+                return value;
+            }
+        },
+        {
+            dataIndex: 'Iteration',
+            cls: 'cardUpperRight',
+            renderer: function(value,meta_data,record){
+                var iteration = record.get('Iteration');
+                var iteration_name = " ";
+                if ( iteration ) {
+                    iteration_name = Ext.util.Format.substr(iteration.Name,0,4);
+                }
+                
+                return iteration_name;
+            }
         },
         {
             dataIndex: 'Project',
@@ -426,20 +451,6 @@ Ext.define('CustomApp', {
                 var feature_project_string = record.get('Feature').Project.Name;
                 
                 return [feature_string,project_string,feature_project_string].join('<br/>');
-            }
-        },
-        {
-            dataIndex: 'PlanEstimate',
-            cls: 'cardUpperRight',
-            renderer: function(value,meta_data,record){
-                var size = record.get('PlanEstimate');
-                if ( ! size ) { size = ""; }
-                var iteration = record.get('Iteration');
-                var iteration_name = " ";
-                if ( iteration ) {
-                    iteration_name = Ext.util.Format.substr(iteration.Name,0,4);
-                }
-                return size + "  " + iteration_name;
             }
         },
         {
@@ -498,11 +509,10 @@ Ext.define('CustomApp', {
             }
         }
 
-.pb {
+        .pb {
                 page-break-after: always;
                 clear: both;
             }
-            
         #buttonDiv,
         #iterationDropdown {
             display: inline;
@@ -556,7 +566,6 @@ Ext.define('CustomApp', {
             text-align: center;
         }
 
-
         .description {
             float: left;
             font: 12pt Georgia, sans-serif;
@@ -569,18 +578,34 @@ Ext.define('CustomApp', {
         }
 
         .cardUpperRight {
-            float: right;
+            text-align: right;
             font: bold 20px Arial, Helvetica, sans-serif;
-            margin-right: 0.3em;
-            margin-top: 0.3em;
-            display: inline-block;
+            top: 0.5em;
+            right: 0.5em;
+            position: absolute;
         }
 
-        .cardUpperLeft {
-            float: left;
+       .cardUpperInnerLeft {
+            text-align: center;
             font: bold 20px Arial, Helvetica, sans-serif;
-            margin-left: 0.25em;
-            margin-top: 0.3em;
+            top: 0.5em;
+            left: 4.0em;
+            width: 6.0em;
+            position: absolute;
+        }
+        .cardUpperInnerRight {
+            text-align: center;
+            font: bold 20px Arial, Helvetica, sans-serif;
+            top: 0.5em;
+            right: 4.0em;
+            width: 6.0em;
+            position: absolute;
+        }
+        .cardUpperLeft {
+            position: absolute;
+            font: bold 20px Arial, Helvetica, sans-serif;
+            top: 0.5em;
+            left: 0.5em;
         }
 
         .cardLowerLeft {
@@ -595,10 +620,13 @@ Ext.define('CustomApp', {
             right: 0.5em;
         }
 
-        .cardTopCenter {
+        .cardUpperCenter {
+            font: bold 20px Arial, Helvetica, sans-serif;
             text-align: center;
+            top: 0.5em;
             position: absolute;
             right: 0.5in;
+            display: inline;
             width: 3in;
         }
         

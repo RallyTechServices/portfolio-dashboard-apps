@@ -175,8 +175,33 @@ Ext.define('CustomApp', {
             cls: 'cardUpperLeft'
         },
         {
+            dataIndex: 'PlanEstimate',
+            cls: 'cardUpperInnerRight',
+            renderer: function(value,meta_data,record){
+                if ( ! value ) { value = ""; }
+                return value;
+            }
+        },
+        {
             dataIndex: 'c_MoSCoW',
-            cls: 'cardTopCenter'
+            cls: 'cardUpperInnerLeft',
+            renderer: function(value,meta_data,record){
+                if ( ! value ) { value = ""; }
+                return value;
+            }
+        },
+        {
+            dataIndex: 'Iteration',
+            cls: 'cardUpperRight',
+            renderer: function(value,meta_data,record){
+                var iteration = record.get('Iteration');
+                var iteration_name = " ";
+                if ( iteration ) {
+                    iteration_name = Ext.util.Format.substr(iteration.Name,0,4);
+                }
+                
+                return iteration_name;
+            }
         },
         {
             dataIndex: 'Project',
@@ -190,20 +215,6 @@ Ext.define('CustomApp', {
                 var feature_project_string = record.get('Feature').Project.Name;
                 
                 return [feature_string,project_string,feature_project_string].join('<br/>');
-            }
-        },
-        {
-            dataIndex: 'PlanEstimate',
-            cls: 'cardUpperRight',
-            renderer: function(value,meta_data,record){
-                var size = record.get('PlanEstimate');
-                if ( ! size ) { size = ""; }
-                var iteration = record.get('Iteration');
-                var iteration_name = " ";
-                if ( iteration ) {
-                    iteration_name = Ext.util.Format.substr(iteration.Name,0,4);
-                }
-                return size + "  " + iteration_name;
             }
         },
         {
