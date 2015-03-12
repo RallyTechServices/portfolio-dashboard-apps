@@ -248,6 +248,7 @@ Ext.define("ReleasePlanList", {
             },
             {dataIndex: 'FormattedID', text: 'id' },
             {dataIndex: 'Name', text: 'Name' },
+            {dataIndex: 'Release', text:'Release'},
             {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
             
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },

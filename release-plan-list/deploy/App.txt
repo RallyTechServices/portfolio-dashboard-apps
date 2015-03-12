@@ -3,11 +3,11 @@
 <head>
     <title>Release Plan List</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Mar 11 2015 19:57:13 GMT-0700 (PDT) -->
+    <!--  Build Date: Wed Mar 11 2015 19:58:57 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Mar 11 2015 19:57:13 GMT-0700 (PDT)";
-        var CHECKSUM = 5203153941;
+        var APP_BUILD_DATE = "Wed Mar 11 2015 19:58:57 GMT-0700 (PDT)";
+        var CHECKSUM = 5237763498;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -388,6 +388,7 @@ Ext.define("ReleasePlanList", {
             },
             {dataIndex: 'FormattedID', text: 'id' },
             {dataIndex: 'Name', text: 'Name' },
+            {dataIndex: 'Release', text:'Release'},
             {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
             
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },
