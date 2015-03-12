@@ -144,9 +144,9 @@ Ext.define("ReleasePlanList", {
         
         var current_cumulative = 0;
         Ext.Array.each(records, function(record){
-            var current_plan_estimate = record.get('LeafStoryPlanEstimateTotal') || 0;
-            current_cumulative = current_cumulative + current_plan_estimate;
-            record.set('_cumulative', current_cumulative);
+//            var current_plan_estimate = record.get('LeafStoryPlanEstimateTotal') || 0;
+//            current_cumulative = current_cumulative + current_plan_estimate;
+//            record.set('_cumulative', current_cumulative);
             
             var fid = record.get('FormattedID');
             record.set('_complete_by_count_percent', me._getCompletePercent(stories_by_feature[fid], 'count'));
@@ -249,20 +249,12 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'FormattedID', text: 'id' },
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
-            { text: 'Cumulative', renderer: function(value,meta_data,record){
-                var cumulative = record.get('_cumulative');
-                if ( !cumulative ) {
-                    return 0;
-                }
-                return cumulative;
-            }, align: 'right' },
+            
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },
             {dataIndex: 'UnEstimatedLeafStoryCount', text: 'Unestimated Story Count' },
             {dataIndex: 'Project', text: 'Project' },
             {dataIndex: 'Ready', text: 'Ready' },
             {dataIndex: 'Owner', text:'Owner' },
-            {dataIndex: 'PlannedStartDate', text: 'Planned Start' },
-            {dataIndex: 'PlannedEndDate', text: 'Planned End' },
             {                             text: '% Complete by Count', renderer: function(value,meta_data,record) {
                 return record.get('_complete_by_count_percent');
             }, align:'right'},
