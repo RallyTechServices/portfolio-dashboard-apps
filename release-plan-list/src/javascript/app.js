@@ -5,8 +5,10 @@ Ext.define("ReleasePlanList", {
     defaults: { margin: 10 },
     items: [
         {xtype:'container',itemId:'selector_box',layout: { type: 'hbox'} },
-        {xtype:'container',itemId:'feature_box'},
-        {xtype:'container',itemId:'story_box'},
+        {xtype:'container', items: [
+            {xtype:'container',itemId:'feature_box'},
+            {xtype:'container',itemId:'story_box'}
+        ]},
         {xtype:'tsinfolink'}
     ],
     launch: function() {
@@ -257,16 +259,17 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'Project', text: 'Project' },
             {dataIndex: 'Ready', text: 'Ready' },
             {dataIndex: 'Owner', text:'Owner' },
-            {                             text: '% Complete by Count', renderer: function(value,meta_data,record) {
+            /* to save column positions/size, we have to have a dataIndex or an itemId */
+            {itemId: '_complete_by_count', text: '% Complete by Count', renderer: function(value,meta_data,record) {
                 return record.get('_complete_by_count_percent');
             }, align:'right'},
-            {                             text: '% Complete by Points', renderer: function(value,meta_data,record) {
+            {itemId: '_complete_by_points',text: '% Complete by Points', renderer: function(value,meta_data,record) {
                 return record.get('_complete_by_points_percent');
             }, align:'right'},
-            {                             text: '% Accepted by Count', renderer: function(value,meta_data,record) {
+            {itemId: '_accepted_by_count',text: '% Accepted by Count', renderer: function(value,meta_data,record) {
                 return record.get('_accepted_by_count_percent');
             }, align:'right'},
-            {                             text: '% Accepted by Points', renderer: function(value,meta_data,record) {
+            {itemId: '_accepted_by_count',text: '% Accepted by Points', renderer: function(value,meta_data,record) {
                 return record.get('_accepted_by_points_percent');
             }, align:'right'}
         ]
@@ -307,13 +310,100 @@ Ext.define("ReleasePlanList", {
     },
     
     _displayGrid:function(container,store,columns) {
+        this.logger.log("_displayGrid",container,store,columns);
+        var me = this;
+        var grid_id = container.itemId + "_grid";
+        var column_order = this.getSetting(grid_id + ".column_order");
+        
+        this.logger.log("saved column order:", grid_id + ".column_order", column_order);
+        this.logger.log("--",this.getSettings());
+        
+        columns = this._alignOrderOfColumns(columns,column_order);
+        
         container.add({
             xtype: 'rallygrid',
             defaultSortToRank: true,
             enableRanking: true,
             showRowActionsColumn: false,
             store: store,
-            columnCfgs: columns
+            itemId: grid_id,
+            columnCfgs: columns,
+            listeners: {
+                /* can't use stateful/stateevents because of the special columns */
+                /*columnresize: this._saveColumnSizes,*/
+                columnmove: function(gridview,column,fromIdx,toIdx) {
+                    me._saveColumnPositions(this);
+                }
+            }
         });
+    },
+    
+    _alignOrderOfColumns: function(columns,column_order) {
+        if ( !column_order ) {
+            return columns;
+        }
+        
+        if ( Ext.isString(column_order) ) {
+            column_order = column_order.split(',');
+        }
+        
+        var ordered_columns = [];
+        var deferred_columns = [];
+        
+        Ext.Array.each(column_order, function(ordered_column_identifier) {
+            Ext.Array.each(columns, function(column){
+                var identifier = column.dataIndex || column.itemId;
+                if ( identifier && identifier == ordered_column_identifier ) {
+                    ordered_columns.push(column);
+                }
+            });
+        });
+        
+        return ordered_columns;
+        
+    },
+
+    _saveColumnPositions: function(grid,column,fromIdx,toIdx) {
+        var app = Rally.getApp();
+        
+        app.logger.log("change column position", grid, column);
+        app.logger.log(" header", grid.headerCt);
+        var columns = grid.headerCt.getGridColumns();
+        app.logger.log(" columns", columns);
+        
+        var column_order = [];
+        Ext.Array.each(columns, function(column){
+            var identifier = column.dataIndex || column.itemId;
+            if ( identifier ) {
+                column_order.push(identifier);
+            }
+        });
+        app.logger.log("Saving column order:",column_order);
+        var settings = {};
+        
+        var app_id = app.getAppId();
+        
+        settings[grid.itemId + ".column_order"] = column_order;
+        
+        app.logger.log("Setting: ", settings);
+        
+        if ( app_id ) {
+            app.updateSettingsValues({
+                settings: settings
+            });
+        }
+    },
+    
+    _saveColumnSizes: function(container,column,width){
+        this.logger.log("change column size", container, column, width);
+        var settings = {};
+        settings[column.itemId] = width;
+        
+        this.logger.log("Saving resize: ", settings);
+        
+//        this.updateSettingsValues({
+//            settings: settings
+//        });
     }
+    
 });
