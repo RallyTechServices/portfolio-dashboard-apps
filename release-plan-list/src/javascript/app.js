@@ -5,12 +5,12 @@ Ext.define("ReleasePlanList", {
     defaults: { margin: 10 },
     items: [
         {xtype:'container',itemId:'selector_box',layout: { type: 'hbox'} },
-        {xtype:'container',itemId:'display_box'},
+        {xtype:'container',itemId:'feature_box'},
+        {xtype:'container',itemId:'story_box'},
         {xtype:'tsinfolink'}
     ],
     launch: function() {
         this._addSelectors(this.down('#selector_box'));
-
     },
     
     _addSelectors: function(container) {
@@ -83,7 +83,6 @@ Ext.define("ReleasePlanList", {
         }).load({
             callback : function(records, operation, successful) {
                 if (successful){
-                    console.log(this);
                     deferred.resolve(this);
                 } else {
                     me.logger.log("Failed: ", operation);
@@ -100,6 +99,37 @@ Ext.define("ReleasePlanList", {
         var model_name = 'PortfolioItem/Feature';
         this.logger.log('_getFeatureStore',filters,story_store);
         
+        var field_names = [];
+        
+        Ext.Array.each(this._getFeatureColumns(), function(column){
+            if (column.dataIndex) {
+                field_names.push(column.dataIndex);
+            }
+        });
+                  
+        Ext.create('Rally.data.wsapi.Store', {
+            model: model_name,
+            fetch: field_names,
+            pageSize: 25,
+            filters: filters,
+            sorters: [{ property:'DragAndDropRank', direction:'ASC'}]
+        }).load({
+            callback : function(records, operation, successful) {
+                if (successful){
+                    me._performFeatureCalculations(story_store,records);                    
+                    deferred.resolve([this,story_store]);
+                } else {
+                    me.logger.log("Failed: ", operation);
+                    deferred.reject('Problem loading: ' + operation.error.errors.join('. '));
+                }
+            }
+        });
+        return deferred.promise;
+    },
+    _performFeatureCalculations: function(story_store,records){
+        var me = this;
+        this.logger.log("_performFeatureCalculations");
+        
         var stories_by_feature = {};
         Ext.Array.each(story_store.getRecords(),function(story){
             var feature = story.get('Feature');
@@ -112,48 +142,19 @@ Ext.define("ReleasePlanList", {
             }
         });
         
-        
-        var field_names = [];
-        
-        Ext.Array.each(this._getFeatureColumns(), function(column){
-            if (column.dataIndex) {
-                field_names.push(column.dataIndex);
-            }
+        var current_cumulative = 0;
+        Ext.Array.each(records, function(record){
+            var current_plan_estimate = record.get('LeafStoryPlanEstimateTotal') || 0;
+            current_cumulative = current_cumulative + current_plan_estimate;
+            record.set('_cumulative', current_cumulative);
+            
+            var fid = record.get('FormattedID');
+            record.set('_complete_by_count_percent', me._getCompletePercent(stories_by_feature[fid], 'count'));
+            record.set('_complete_by_points_percent', me._getCompletePercent(stories_by_feature[fid], 'points'));
+            record.set('_accepted_by_count_percent', me._getAcceptedPercent(stories_by_feature[fid], 'count'));
+            record.set('_accepted_by_points_percent', me._getAcceptedPercent(stories_by_feature[fid], 'points'));
+            
         });
-        
-        this.logger.log("Starting load:",filters);
-          
-        Ext.create('Rally.data.wsapi.Store', {
-            model: model_name,
-            fetch: field_names,
-            pageSize: 25,
-            filters: filters,
-            sorters: [{ property:'DragAndDropRank', direction:'ASC'}]
-        }).load({
-            callback : function(records, operation, successful) {
-                if (successful){
-                    var current_cumulative = 0;
-                    Ext.Array.each(records, function(record){
-                        var current_plan_estimate = record.get('LeafStoryPlanEstimateTotal') || 0;
-                        current_cumulative = current_cumulative + current_plan_estimate;
-                        record.set('_cumulative', current_cumulative);
-                        
-                        var fid = record.get('FormattedID');
-                        record.set('_complete_by_count_percent', me._getCompletePercent(stories_by_feature[fid], 'count'));
-                        record.set('_complete_by_points_percent', me._getCompletePercent(stories_by_feature[fid], 'points'));
-                        record.set('_accepted_by_count_percent', me._getAcceptedPercent(stories_by_feature[fid], 'count'));
-                        record.set('_accepted_by_points_percent', me._getAcceptedPercent(stories_by_feature[fid], 'points'));
-                        
-                    });
-                    
-                    deferred.resolve([this,story_store]);
-                } else {
-                    me.logger.log("Failed: ", operation);
-                    deferred.reject('Problem loading: ' + operation.error.errors.join('. '));
-                }
-            }
-        });
-        return deferred.promise;
     },
     _getCompletePercent: function(stories, metric) {
         if ( ! stories ) {
@@ -217,9 +218,21 @@ Ext.define("ReleasePlanList", {
         
     },
     _displayGrids: function(feature_store, story_store){
-        this.down('#display_box').removeAll();
-        this._displayGrid(feature_store, this._getFeatureColumns());
-        this._displayGrid(story_store, this._getStoryColumns());
+        this.down('#feature_box').removeAll();
+        this.down('#story_box').removeAll();
+        feature_store.on('load', 
+            function(store, features, successful) {
+                if (successful){
+                    this._performFeatureCalculations(story_store,features);
+                } else {
+                    this.logger.log("Failed: ", operation);
+                }
+            },
+            this
+        );
+        
+        this._displayGrid(this.down('#feature_box'),feature_store, this._getFeatureColumns());
+        this._displayGrid(this.down('#story_box'),story_store, this._getStoryColumns());
     },
     
     _getFeatureColumns: function() {
@@ -298,8 +311,8 @@ Ext.define("ReleasePlanList", {
         return columns;
     },
     
-    _displayGrid:function(store,columns) {
-        this.down('#display_box').add({
+    _displayGrid:function(container,store,columns) {
+        container.add({
             xtype: 'rallygrid',
             defaultSortToRank: true,
             enableRanking: true,
