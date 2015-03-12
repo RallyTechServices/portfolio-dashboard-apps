@@ -291,6 +291,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'FormattedID', text: 'id' },
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release',text: 'Release'},
+            {dataIndex: 'c_RequestedIteration',text: 'Requested Iteration'},
             {dataIndex: 'Iteration', text: 'Iteration' },
             {dataIndex: 'c_MoSCoW', text: 'MoSCoW' },
             {dataIndex: 'Project', text: 'Project' },
