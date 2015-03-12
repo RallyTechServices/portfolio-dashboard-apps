@@ -314,11 +314,12 @@ Ext.define("ReleasePlanList", {
         var me = this;
         var grid_id = container.itemId + "_grid";
         var column_order = this.getSetting(grid_id + ".column_order");
+        var column_sizes = this.getSetting(grid_id + ".column_sizes");
         
-        this.logger.log("saved column order:", grid_id + ".column_order", column_order);
-        this.logger.log("--",this.getSettings());
+        this.logger.log("settings",this.getSettings());
         
         columns = this._alignOrderOfColumns(columns,column_order);
+        columns = this._alignSizesOfColumns(columns,column_sizes);
         
         container.add({
             xtype: 'rallygrid',
@@ -330,7 +331,9 @@ Ext.define("ReleasePlanList", {
             columnCfgs: columns,
             listeners: {
                 /* can't use stateful/stateevents because of the special columns */
-                /*columnresize: this._saveColumnSizes,*/
+                columnresize: function(gridview) {
+                    me._saveColumnSizes(this);
+                },
                 columnmove: function(gridview,column,fromIdx,toIdx) {
                     me._saveColumnPositions(this);
                 }
@@ -362,14 +365,33 @@ Ext.define("ReleasePlanList", {
         return ordered_columns;
         
     },
-
-    _saveColumnPositions: function(grid,column,fromIdx,toIdx) {
-        var app = Rally.getApp();
+    
+    _alignSizesOfColumns: function(columns,column_sizes) {
+        if ( !column_sizes ) {
+            return columns;
+        }
         
-        app.logger.log("change column position", grid, column);
-        app.logger.log(" header", grid.headerCt);
+        if ( Ext.isString(column_sizes) ) {
+            column_sizes = Ext.JSON.decode(column_sizes);
+        }
+        
+        if ( Ext.isObject(column_sizes) ) {
+        
+            Ext.Array.each(columns, function(column){
+                var identifier = column.dataIndex || column.itemId;
+                if ( identifier && column_sizes[identifier] ) {
+                    column.width = column_sizes[identifier];
+                }
+            });
+            
+        }
+        return columns;
+    },
+    
+
+    _saveColumnPositions: function(grid) {
+        var app = Rally.getApp();
         var columns = grid.headerCt.getGridColumns();
-        app.logger.log(" columns", columns);
         
         var column_order = [];
         Ext.Array.each(columns, function(column){
@@ -378,15 +400,13 @@ Ext.define("ReleasePlanList", {
                 column_order.push(identifier);
             }
         });
-        app.logger.log("Saving column order:",column_order);
+
         var settings = {};
         
         var app_id = app.getAppId();
         
         settings[grid.itemId + ".column_order"] = column_order;
-        
-        app.logger.log("Setting: ", settings);
-        
+                
         if ( app_id ) {
             app.updateSettingsValues({
                 settings: settings
@@ -394,16 +414,29 @@ Ext.define("ReleasePlanList", {
         }
     },
     
-    _saveColumnSizes: function(container,column,width){
-        this.logger.log("change column size", container, column, width);
+    _saveColumnSizes: function(grid,column){
+        var app = Rally.getApp();
+        var columns = grid.headerCt.getGridColumns();
+        
+        var column_sizes = {};
+        Ext.Array.each(columns, function(column){
+            var identifier = column.dataIndex || column.itemId;
+            if ( identifier && column.width ) {
+                column_sizes[identifier] = column.width;
+            }
+        });
+
         var settings = {};
-        settings[column.itemId] = width;
         
-        this.logger.log("Saving resize: ", settings);
+        var app_id = app.getAppId();
         
-//        this.updateSettingsValues({
-//            settings: settings
-//        });
+        settings[grid.itemId + ".column_sizes"] = Ext.JSON.encode(column_sizes);
+                
+        if ( app_id ) {
+            app.updateSettingsValues({
+                settings: settings
+            });
+        }
     }
     
 });
