@@ -249,6 +249,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'FormattedID', text: 'id' },
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release', text:'Release'},
+            {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
             {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
             
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },
@@ -293,7 +294,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'Release',text: 'Release'},
             {dataIndex: 'c_RequestedIteration',text: 'Requested Iteration'},
             {dataIndex: 'Iteration', text: 'Iteration' },
-            {dataIndex: 'c_MoSCoW', text: 'MoSCoW' },
+            {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
             {dataIndex: 'Project', text: 'Project' },
             {dataIndex: 'PlanEstimate', text: 'Plan Estimate' },
             {dataIndex: 'ScheduleState', text: 'Schedule State' },

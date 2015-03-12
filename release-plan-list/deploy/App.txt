@@ -3,11 +3,11 @@
 <head>
     <title>Release Plan List</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Mar 11 2015 20:02:33 GMT-0700 (PDT) -->
+    <!--  Build Date: Wed Mar 11 2015 20:06:26 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Mar 11 2015 20:02:33 GMT-0700 (PDT)";
-        var CHECKSUM = 5298120066;
+        var APP_BUILD_DATE = "Wed Mar 11 2015 20:06:26 GMT-0700 (PDT)";
+        var CHECKSUM = 5349358955;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -389,6 +389,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'FormattedID', text: 'id' },
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release', text:'Release'},
+            {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
             {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
             
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },
@@ -433,7 +434,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'Release',text: 'Release'},
             {dataIndex: 'c_RequestedIteration',text: 'Requested Iteration'},
             {dataIndex: 'Iteration', text: 'Iteration' },
-            {dataIndex: 'c_MoSCoW', text: 'MoSCoW' },
+            {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
             {dataIndex: 'Project', text: 'Project' },
             {dataIndex: 'PlanEstimate', text: 'Plan Estimate' },
             {dataIndex: 'ScheduleState', text: 'Schedule State' },
