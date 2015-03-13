@@ -3,6 +3,11 @@ Ext.define("ReleasePlanList", {
     componentCls: 'app',
     logger: new Rally.technicalservices.Logger(),
     defaults: { margin: 10 },
+    config: {
+        defaultSettings: {
+            timebox_selection: 'Release'
+        }
+    },
     items: [
         {xtype:'container',itemId:'selector_box',layout: { type: 'hbox'} },
         {xtype:'container', items: [
@@ -12,53 +17,96 @@ Ext.define("ReleasePlanList", {
         {xtype:'tsinfolink'}
     ],
     launch: function() {
+         if (typeof(this.getAppId()) == 'undefined' ) {
+            // not inside Rally
+            this._showExternalSettingsDialog(this.getSettingsFields());
+        } else {
+            this._buildDisplay();
+        }
+    },
+    _buildDisplay: function() {
         this._addSelectors(this.down('#selector_box'));
     },
     
     _addSelectors: function(container) {
-        container.add({
-            xtype: 'rallyfieldvaluecombobox',
-            model: 'PortfolioItem',
-            field: 'c_RequestedRelease',
-            stateful: true,
-            stateId: 'rally.technicalservices.featureplanning.requestedrelease',
-            stateEvents: ['change'],
-            listeners: {
-                scope: this,
-                change: function(cb) {
-                    var me = this;
-                    this.setLoading("Loading Features and Stories");
-                    
-                    var feature_filter = [
-                        {property:'c_RequestedRelease',value:cb.getValue()}
-                    ];
-                    
-                    var story_filter = [
-                        {property:'Feature.c_RequestedRelease',value:cb.getValue()},
-                        {property:'DirectChildrenCount',value:0}
-                    ];
-                    
-                    Deft.Chain.pipeline([
-                        function() { 
-                            return this._getStoryStore(story_filter);
-                        },
-                        function(story_store) {
-                            return this._getFeatureStore(feature_filter,story_store);
-                        }
-                    ],this).then({
-                        scope: this,
-                        success: function(results) {
-                            this.setLoading('Creating Grids');
-                            this._displayGrids(results[0],results[1]);
-                        },
-                        failure: function(error_message){
-                            alert(error_message);
-                        }
-                    }).always(function() {
-                        me.setLoading(false);
-                    });
+        this.logger.log("Selector to use: ", this.getSetting('timebox_selection'));
+        
+        if ( this.getSetting('timebox_selection') == "RequestedRelease") {
+            container.add({
+                xtype: 'rallyfieldvaluecombobox',
+                model: 'PortfolioItem',
+                field: 'c_RequestedRelease',
+                stateful: true,
+                stateId: 'rally.technicalservices.featureplanning.requestedrelease',
+                stateEvents: ['change'],
+                listeners: {
+                    scope: this,
+                    change: function(cb) {
+                        var me = this;
+                        this.setLoading("Loading Features and Stories");
+                        
+                        var feature_filter = [
+                            {property:'c_RequestedRelease',value:cb.getValue()}
+                        ];
+                        
+                        var story_filter = [
+                            {property:'Feature.c_RequestedRelease',value:cb.getValue()},
+                            {property:'DirectChildrenCount',value:0}
+                        ];
+                        
+                        this._getData(story_filter,feature_filter);
+                    }
                 }
+            });
+        } else {
+            container.add({
+                xtype: 'rallyreleasecombobox',
+                stateful: true,
+                stateId: 'rally.technicalservices.featureplanning.release',
+                stateEvents: ['change'],
+                listeners: {
+                    scope: this,
+                    change: function(cb) {
+                        var me = this;
+                        this.setLoading("Loading Features and Stories");
+                        
+                        var feature_filter = [
+                            {property:'Release.Name',value:cb.getRecord().get('Name')}
+                        ];
+                        
+                        var story_filter = [
+                            {property:'Feature.Release.Name',value:cb.getRecord().get('Name')},
+                            {property:'DirectChildrenCount',value:0}
+                        ];
+                        
+                        this._getData(story_filter,feature_filter);
+                    }
+                }
+            });
+        }
+    },
+    
+    _getData: function(story_filter,feature_filter) {
+        var me = this;
+        
+        Deft.Chain.pipeline([
+            function() { 
+                return this._getStoryStore(story_filter);
+            },
+            function(story_store) {
+                return this._getFeatureStore(feature_filter,story_store);
             }
+        ],this).then({
+            scope: this,
+            success: function(results) {
+                this.setLoading('Creating Grids');
+                this._displayGrids(results[0],results[1]);
+            },
+            failure: function(error_message){
+                alert(error_message);
+            }
+        }).always(function() {
+            me.setLoading(false);
         });
     },
     
@@ -388,7 +436,6 @@ Ext.define("ReleasePlanList", {
         return columns;
     },
     
-
     _saveColumnPositions: function(grid) {
         var app = Rally.getApp();
         var columns = grid.headerCt.getGridColumns();
@@ -437,6 +484,71 @@ Ext.define("ReleasePlanList", {
                 settings: settings
             });
         }
+    },
+    getSettingsFields: function() {
+        var selector_data = [{
+            'name': 'Release',
+            'value': 'Release'
+        },{
+            'name': 'Requested Release',
+            'value': 'RequestedRelease'
+        }];
+        
+        var selector_store = Ext.create('Rally.data.custom.Store',{ 
+            autoLoad: true,
+            data: selector_data
+        });
+        
+        return [{
+            name: 'timebox_selection',
+            xtype: 'rallycombobox',
+            fieldLabel: 'Select by',
+            displayField: 'name',
+            valueField: 'value',
+            store: selector_store,
+            labelWidth: 150,
+            readyEvent: 'ready' //event fired to signify readiness
+        }];
+    },
+    
+    // ONLY FOR RUNNING EXTERNALLY
+    _showExternalSettingsDialog: function(fields){
+        var me = this;
+        if ( this.settings_dialog ) { this.settings_dialog.destroy(); }
+        this.settings_dialog = Ext.create('Rally.ui.dialog.Dialog', {
+             autoShow: false,
+             draggable: true,
+             width: 400,
+             title: 'Settings',
+             buttons: [{ 
+                text: 'OK',
+                handler: function(cmp){
+                    var settings = {};
+                    Ext.Array.each(fields,function(field){
+                        settings[field.name] = cmp.up('rallydialog').down('[name="' + field.name + '"]').getValue();
+                    });
+                    me.settings = settings;
+                    cmp.up('rallydialog').destroy();
+                    me._buildDisplay();
+                }
+            }],
+             items: [
+                {xtype:'container',html: "&nbsp;", padding: 5, margin: 5},
+                {xtype:'container',itemId:'field_box', padding: 5, margin: 5}]
+         });
+         Ext.Array.each(fields,function(field){
+            me.settings_dialog.down('#field_box').add(field);
+         });
+         this.settings_dialog.show();
+    },
+    resizeIframe: function() {
+        var iframeContentHeight = 400;    
+        var container = window.frameElement.parentElement;
+        if (container != parent.document.body) {
+            container.style.height = iframeContentHeight + 'px';
+        }
+        window.frameElement.style.height = iframeContentHeight + 'px';
+        return;
     }
     
 });
