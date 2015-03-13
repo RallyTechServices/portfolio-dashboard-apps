@@ -3,11 +3,11 @@
 <head>
     <title>Release Plan List</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Mar 12 2015 17:06:02 GMT-0700 (PDT) -->
+    <!--  Build Date: Thu Mar 12 2015 17:25:44 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Mar 12 2015 17:06:02 GMT-0700 (PDT)";
-        var CHECKSUM = 11389749190;
+        var APP_BUILD_DATE = "Thu Mar 12 2015 17:25:44 GMT-0700 (PDT)";
+        var CHECKSUM = 17840469524;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -138,6 +138,155 @@ Ext.define('Rally.technicalservices.Logger',{
 
 });
 
+Ext.define('Rally.technicalservices.FileUtilities', {
+    singleton: true,
+    logger: new Rally.technicalservices.Logger(),
+    
+    saveTextAsFile: function(textToWrite, fileName, options)
+    {
+        var options = Ext.merge( { type:'text/plain' }, options);
+        
+        var textFileAsBlob = new Blob([textToWrite], options);
+        var fileNameToSaveAs = fileName;
+
+        var downloadLink = document.createElement("a");
+        downloadLink.download = fileNameToSaveAs;
+        downloadLink.innerHTML = "Download File";
+        if (window.webkitURL != null)
+        {
+            // Chrome allows the link to be clicked
+            // without actually adding it to the DOM.
+            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+        }
+        else
+        {
+            // Firefox requires the link to be added to the DOM
+            // before it can be clicked.
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+            downloadLink.onclick = this.destroyClickedElement;
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+        }
+        downloadLink.click();
+    },
+    destroyClickedElement: function(event)
+    {
+        document.body.removeChild(event.target);
+    },
+    convertDataArrayToCSVText: function(data_array, requestedFieldHash){
+       
+        var text = '';
+        Ext.each(Object.keys(requestedFieldHash), function(key){
+            text += requestedFieldHash[key] + ',';
+        });
+        text = text.replace(/,$/,'\n');
+        
+        Ext.each(data_array, function(d){
+            Ext.each(Object.keys(requestedFieldHash), function(key){
+                if (d[key]){
+                    if (typeof d[key] === 'object'){
+                        if (d[key].FormattedID) {
+                            text += Ext.String.format("\"{0}\",",d[key].FormattedID ); 
+                        } else if (d[key].Name) {
+                            text += Ext.String.format("\"{0}\",",d[key].Name );                    
+                        } else if (!isNaN(Date.parse(d[key]))){
+                            text += Ext.String.format("\"{0}\",",Rally.util.DateTime.formatWithDefaultDateTime(d[key]));
+                        }else {
+                            text += Ext.String.format("\"{0}\",",d[key].toString());
+                        }
+                    } else {
+                        text += Ext.String.format("\"{0}\",",d[key] );                    
+                    }
+                } else {
+                    text += ',';
+                }
+            },this);
+            text = text.replace(/,$/,'\n');
+        },this);
+        return text;
+    },
+    /*
+     * will render using your grid renderer.  If you want it to ignore the grid renderer, 
+     * have the column set _csvIgnoreRender: true
+     */
+    getCSVFromGrid:function(grid){
+        var deferred = Ext.create('Deft.Deferred');
+        var store = grid.getStore();
+                
+        var columns = grid.columns;
+        var column_names = [];
+        var headers = [];
+        
+        var csv = [];
+        
+        Ext.Array.each(columns,function(column){
+            if ( column.dataIndex || column.renderer ) {
+                column_names.push(column.dataIndex);
+                if ( column.csvText ) {
+                    headers.push(column.csvText);
+                } else {
+                    headers.push(column.text);
+                }
+            }
+        });
+        
+        csv.push('"' + headers.join('","') + '"');
+        
+        var mock_meta_data = {
+            align: "right",
+            classes: [],
+            cellIndex: 9,
+            column: null,
+            columnIndex: 9,
+            innerCls: undefined,
+            recordIndex: 5,
+            rowIndex: 5,
+            style: "",
+            tdAttr: "",
+            tdCls: "x-grid-cell x-grid-td x-grid-cell-headerId-gridcolumn-1029 x-grid-cell-last x-unselectable",
+            unselectableAttr: "unselectable='on'"
+        }
+        
+//        store.pageSize = 10000;
+//        store.limit = 10000;
+        
+        var all_records = [];
+        store.loadPages({
+            callback: function(records) {
+                for ( var i=0; i<records.length; i++ ) {
+                    var record = records[i];
+                    
+                    var node_values = [];
+                    Ext.Array.each(columns,function(column){
+                        if ( column.dataIndex) {
+                            var column_name = column.dataIndex;
+                            var display_value = record.get(column_name);
+
+                            if ( !column._csvIgnoreRender && column.renderer ) {
+                                display_value = column.renderer(display_value,mock_meta_data,record, 0, 0, store, grid.getView());
+                            }
+                            node_values.push(display_value);
+                        } else {
+                            var display_value = null;
+                            if ( !column._csvIgnoreRender && column.renderer ) {
+                                display_value = column.renderer(display_value,mock_meta_data,record,record, 0, 0, store, grid.getView());
+                                node_values.push(display_value);
+                            }
+                        }
+                    },this);
+                    csv.push('"' + node_values.join('","') + '"');
+                }
+                
+                deferred.resolve( csv.join('\r\n') );
+            },
+            scope: this
+        });
+        
+        return deferred.promise;
+        
+    }
+    
+});
 Ext.define("ReleasePlanList", {
     extend: 'Rally.app.App',
     componentCls: 'app',
@@ -436,7 +585,7 @@ Ext.define("ReleasePlanList", {
                 width: 35,
                 sortable: true
             },
-            {dataIndex: 'FormattedID', text: 'id' },
+            {dataIndex: 'FormattedID', text: 'id', _csvIgnoreRender: true  },
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release', text:'Release'},
             {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
@@ -480,7 +629,7 @@ Ext.define("ReleasePlanList", {
                 
                 return value.Name;
             }},
-            {dataIndex: 'FormattedID', text: 'id' },
+            {dataIndex: 'FormattedID', text: 'id', _csvIgnoreRender: true },
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release',text: 'Release'},
             {dataIndex: 'c_RequestedIteration',text: 'Requested Iteration'},
@@ -501,6 +650,9 @@ Ext.define("ReleasePlanList", {
         this.logger.log("_displayGrid",container,store,columns);
         var me = this;
         var grid_id = container.itemId + "_grid";
+
+        var selector_container = container.add({xtype:'container',layout: { type: 'hbox' }, margin: 10});
+
         var column_order = this.getSetting(grid_id + ".column_order");
         var column_sizes = this.getSetting(grid_id + ".column_sizes");
         
@@ -509,7 +661,7 @@ Ext.define("ReleasePlanList", {
         columns = this._alignOrderOfColumns(columns,column_order);
         columns = this._alignSizesOfColumns(columns,column_sizes);
         
-        container.add({
+        var grid = container.add({
             xtype: 'rallygrid',
             defaultSortToRank: true,
             enableRanking: true,
@@ -527,6 +679,24 @@ Ext.define("ReleasePlanList", {
                 }
             }
         });
+        
+                    
+        selector_container.add({
+            xtype:'component',
+            flex: 1
+        });
+        
+        selector_container.add({
+            xtype:'rallybutton',
+            text: 'Export',
+            listeners: {
+                scope: this,
+                click: function() {
+                    this._exportToCSV(grid);
+                }
+            }
+        });
+        
     },
     
     _alignOrderOfColumns: function(columns,column_order) {
@@ -625,6 +795,19 @@ Ext.define("ReleasePlanList", {
             });
         }
     },
+    
+    _exportToCSV: function(grid) {
+        this.setLoading(true);
+        
+        Rally.technicalservices.FileUtilities.getCSVFromGrid(grid).then({
+            scope: this,
+            success: function(csv) {
+                this.setLoading(false);
+                Rally.technicalservices.FileUtilities.saveTextAsFile(csv, 'export.csv',{type:'text/csv;charset=utf-8'})
+            }
+        });
+    },
+    
     getSettingsFields: function() {
         var selector_data = [{
             'name': 'Release',

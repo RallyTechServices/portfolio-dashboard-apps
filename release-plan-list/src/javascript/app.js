@@ -296,7 +296,7 @@ Ext.define("ReleasePlanList", {
                 width: 35,
                 sortable: true
             },
-            {dataIndex: 'FormattedID', text: 'id' },
+            {dataIndex: 'FormattedID', text: 'id', _csvIgnoreRender: true  },
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release', text:'Release'},
             {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
@@ -340,7 +340,7 @@ Ext.define("ReleasePlanList", {
                 
                 return value.Name;
             }},
-            {dataIndex: 'FormattedID', text: 'id' },
+            {dataIndex: 'FormattedID', text: 'id', _csvIgnoreRender: true },
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release',text: 'Release'},
             {dataIndex: 'c_RequestedIteration',text: 'Requested Iteration'},
@@ -361,6 +361,9 @@ Ext.define("ReleasePlanList", {
         this.logger.log("_displayGrid",container,store,columns);
         var me = this;
         var grid_id = container.itemId + "_grid";
+
+        var selector_container = container.add({xtype:'container',layout: { type: 'hbox' }, margin: 10});
+
         var column_order = this.getSetting(grid_id + ".column_order");
         var column_sizes = this.getSetting(grid_id + ".column_sizes");
         
@@ -369,7 +372,7 @@ Ext.define("ReleasePlanList", {
         columns = this._alignOrderOfColumns(columns,column_order);
         columns = this._alignSizesOfColumns(columns,column_sizes);
         
-        container.add({
+        var grid = container.add({
             xtype: 'rallygrid',
             defaultSortToRank: true,
             enableRanking: true,
@@ -387,6 +390,24 @@ Ext.define("ReleasePlanList", {
                 }
             }
         });
+        
+                    
+        selector_container.add({
+            xtype:'component',
+            flex: 1
+        });
+        
+        selector_container.add({
+            xtype:'rallybutton',
+            text: 'Export',
+            listeners: {
+                scope: this,
+                click: function() {
+                    this._exportToCSV(grid);
+                }
+            }
+        });
+        
     },
     
     _alignOrderOfColumns: function(columns,column_order) {
@@ -485,6 +506,19 @@ Ext.define("ReleasePlanList", {
             });
         }
     },
+    
+    _exportToCSV: function(grid) {
+        this.setLoading(true);
+        
+        Rally.technicalservices.FileUtilities.getCSVFromGrid(grid).then({
+            scope: this,
+            success: function(csv) {
+                this.setLoading(false);
+                Rally.technicalservices.FileUtilities.saveTextAsFile(csv, 'export.csv',{type:'text/csv;charset=utf-8'})
+            }
+        });
+    },
+    
     getSettingsFields: function() {
         var selector_data = [{
             'name': 'Release',
