@@ -300,8 +300,9 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release', text:'Release'},
             {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
-            {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
             
+            {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
+
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },
             {dataIndex: 'UnEstimatedLeafStoryCount', text: 'Unestimated Story Count' },
             {dataIndex: 'Project', text: 'Project' },
