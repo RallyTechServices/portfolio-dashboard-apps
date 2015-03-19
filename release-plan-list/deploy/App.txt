@@ -3,11 +3,11 @@
 <head>
     <title>Release Plan List</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Mar 12 2015 17:25:44 GMT-0700 (PDT) -->
+    <!--  Build Date: Thu Mar 19 2015 12:29:21 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Mar 12 2015 17:25:44 GMT-0700 (PDT)";
-        var CHECKSUM = 17840469524;
+        var APP_BUILD_DATE = "Thu Mar 19 2015 12:29:21 GMT-0700 (PDT)";
+        var CHECKSUM = 17884241972;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -418,7 +418,10 @@ Ext.define("ReleasePlanList", {
             model: 'HierarchicalRequirement',
             pageSize: 25,
             fetch: field_names,
-            filters: filters
+            filters: filters,
+            context: {
+                project:null
+            }
         }).load({
             callback : function(records, operation, successful) {
                 if (successful){
@@ -589,8 +592,9 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'Name', text: 'Name' },
             {dataIndex: 'Release', text:'Release'},
             {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
-            {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
             
+            {dataIndex: 'LeafStoryPlanEstimateTotal', text: 'Story Plan Estimate Total'},
+
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },
             {dataIndex: 'UnEstimatedLeafStoryCount', text: 'Unestimated Story Count' },
             {dataIndex: 'Project', text: 'Project' },

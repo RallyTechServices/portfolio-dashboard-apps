@@ -129,7 +129,10 @@ Ext.define("ReleasePlanList", {
             model: 'HierarchicalRequirement',
             pageSize: 25,
             fetch: field_names,
-            filters: filters
+            filters: filters,
+            context: {
+                project:null
+            }
         }).load({
             callback : function(records, operation, successful) {
                 if (successful){
