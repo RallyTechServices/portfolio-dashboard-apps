@@ -15,7 +15,7 @@ Ext.define('CustomApp', {
             enableHierarchy: true,
             fetch: ['c_MoSCoW','Name','ObjectID','Feature',
                     'PortfolioItem','FormattedID','Project',
-                    'Iteration','c_PrimaryDevTeam'],
+                    'Iteration','c_PrimaryDevTeam','c_MoSCoWPriority'],
             _getStoreTypePaths: function() {
                 return ['portfolioitem/feature','hierarchicalrequirement'];
             }
@@ -155,6 +155,9 @@ Ext.define('CustomApp', {
             autoLoad: true,
             context: { project: null },
             filters: [{ property:'PortfolioItem.ObjectID',value:selected_item.get('ObjectID')}],
+            fetch:  ['c_MoSCoWPriority','Name','ObjectID','Feature', 'PlanEstimate',
+                    'PortfolioItem','FormattedID','Project',
+                    'Iteration','c_PrimaryDevTeam'],
             listeners: {
                 load: function(store, records, successful) {
                     if (successful){
@@ -183,7 +186,7 @@ Ext.define('CustomApp', {
             }
         },
         {
-            dataIndex: 'c_MoSCoW',
+            dataIndex: 'c_MoSCoWPriority',
             cls: 'cardUpperInnerLeft',
             renderer: function(value,meta_data,record){
                 if ( ! value ) { value = ""; }
@@ -210,6 +213,7 @@ Ext.define('CustomApp', {
                 if ( !value ) {
                     return "";
                 }
+                
                 var feature_string = record.get('Feature').FormattedID + ":  " + record.get('Feature').Name;
                 var project_string = record.get('Feature').c_PrimaryDevTeam;
                 var feature_project_string = record.get('Feature').Project.Name;
