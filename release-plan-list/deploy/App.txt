@@ -3,11 +3,11 @@
 <head>
     <title>Release Plan List</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Mar 19 2015 12:29:21 GMT-0700 (PDT) -->
+    <!--  Build Date: Thu Mar 26 2015 10:57:24 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Mar 19 2015 12:29:21 GMT-0700 (PDT)";
-        var CHECKSUM = 17884241972;
+        var APP_BUILD_DATE = "Thu Mar 26 2015 10:57:24 GMT-0700 (PDT)";
+        var CHECKSUM = 18045480023;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -251,8 +251,10 @@ Ext.define('Rally.technicalservices.FileUtilities', {
 //        store.limit = 10000;
         
         var all_records = [];
+
         store.loadPages({
-            callback: function(records) {
+
+            callback: function(records) {                
                 for ( var i=0; i<records.length; i++ ) {
                     var record = records[i];
                     
@@ -261,15 +263,21 @@ Ext.define('Rally.technicalservices.FileUtilities', {
                         if ( column.dataIndex) {
                             var column_name = column.dataIndex;
                             var display_value = record.get(column_name);
-
+                            
                             if ( !column._csvIgnoreRender && column.renderer ) {
-                                display_value = column.renderer(display_value,mock_meta_data,record, 0, 0, store, grid.getView());
+                                display_value = column.renderer(display_value,mock_meta_data,record, i, 0, store, grid.getView());
                             }
+                            
+
+                            if ( column.dataIndex == "DragAndDropRank" ) {
+                                display_value = i+1;
+                            }
+                            
                             node_values.push(display_value);
                         } else {
                             var display_value = null;
                             if ( !column._csvIgnoreRender && column.renderer ) {
-                                display_value = column.renderer(display_value,mock_meta_data,record,record, 0, 0, store, grid.getView());
+                                display_value = column.renderer(display_value,mock_meta_data,record,record, i, 0, store, grid.getView());
                                 node_values.push(display_value);
                             }
                         }
@@ -414,7 +422,6 @@ Ext.define("ReleasePlanList", {
         this.logger.log("getting stories:",filters);
           
         Ext.create('Rally.data.wsapi.Store', {
-            limit:'Infinity',
             model: 'HierarchicalRequirement',
             pageSize: 25,
             fetch: field_names,
@@ -598,7 +605,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },
             {dataIndex: 'UnEstimatedLeafStoryCount', text: 'Unestimated Story Count' },
             {dataIndex: 'Project', text: 'Project' },
-            {dataIndex: 'Ready', text: 'Ready' },
+            {dataIndex: 'Ready', text: 'Ready' , _csvIgnoreRender: true },
             {dataIndex: 'Owner', text:'Owner' },
             /* to save column positions/size, we have to have a dataIndex or an itemId */
             {itemId: '_complete_by_count', text: '% Complete by Count', renderer: function(value,meta_data,record) {
@@ -641,7 +648,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
             {dataIndex: 'Project', text: 'Project' },
             {dataIndex: 'PlanEstimate', text: 'Plan Estimate' },
-            {dataIndex: 'ScheduleState', text: 'Schedule State' },
+            {dataIndex: 'ScheduleState', text: 'Schedule State', _csvIgnoreRender: true },
             {dataIndex: 'Owner', text: 'Owner' },
             {dataIndex: 'Predecessors', text: 'Predecessors' },
             {dataIndex: 'Successors', text: 'Successors' }

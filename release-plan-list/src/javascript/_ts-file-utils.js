@@ -111,8 +111,10 @@ Ext.define('Rally.technicalservices.FileUtilities', {
 //        store.limit = 10000;
         
         var all_records = [];
+
         store.loadPages({
-            callback: function(records) {
+
+            callback: function(records) {                
                 for ( var i=0; i<records.length; i++ ) {
                     var record = records[i];
                     
@@ -121,15 +123,21 @@ Ext.define('Rally.technicalservices.FileUtilities', {
                         if ( column.dataIndex) {
                             var column_name = column.dataIndex;
                             var display_value = record.get(column_name);
-
+                            
                             if ( !column._csvIgnoreRender && column.renderer ) {
-                                display_value = column.renderer(display_value,mock_meta_data,record, 0, 0, store, grid.getView());
+                                display_value = column.renderer(display_value,mock_meta_data,record, i, 0, store, grid.getView());
                             }
+                            
+
+                            if ( column.dataIndex == "DragAndDropRank" ) {
+                                display_value = i+1;
+                            }
+                            
                             node_values.push(display_value);
                         } else {
                             var display_value = null;
                             if ( !column._csvIgnoreRender && column.renderer ) {
-                                display_value = column.renderer(display_value,mock_meta_data,record,record, 0, 0, store, grid.getView());
+                                display_value = column.renderer(display_value,mock_meta_data,record,record, i, 0, store, grid.getView());
                                 node_values.push(display_value);
                             }
                         }

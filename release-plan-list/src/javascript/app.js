@@ -125,7 +125,6 @@ Ext.define("ReleasePlanList", {
         this.logger.log("getting stories:",filters);
           
         Ext.create('Rally.data.wsapi.Store', {
-            limit:'Infinity',
             model: 'HierarchicalRequirement',
             pageSize: 25,
             fetch: field_names,
@@ -309,7 +308,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'LeafStoryCount', text: 'Story Count' },
             {dataIndex: 'UnEstimatedLeafStoryCount', text: 'Unestimated Story Count' },
             {dataIndex: 'Project', text: 'Project' },
-            {dataIndex: 'Ready', text: 'Ready' },
+            {dataIndex: 'Ready', text: 'Ready' , _csvIgnoreRender: true },
             {dataIndex: 'Owner', text:'Owner' },
             /* to save column positions/size, we have to have a dataIndex or an itemId */
             {itemId: '_complete_by_count', text: '% Complete by Count', renderer: function(value,meta_data,record) {
@@ -352,7 +351,7 @@ Ext.define("ReleasePlanList", {
             {dataIndex: 'c_MoSCoW', text: 'MoSCoW Priority' },
             {dataIndex: 'Project', text: 'Project' },
             {dataIndex: 'PlanEstimate', text: 'Plan Estimate' },
-            {dataIndex: 'ScheduleState', text: 'Schedule State' },
+            {dataIndex: 'ScheduleState', text: 'Schedule State', _csvIgnoreRender: true },
             {dataIndex: 'Owner', text: 'Owner' },
             {dataIndex: 'Predecessors', text: 'Predecessors' },
             {dataIndex: 'Successors', text: 'Successors' }
