@@ -3,11 +3,11 @@
 <head>
     <title>Release Planning Summary</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Mar 16 2015 15:22:07 GMT-0700 (PDT) -->
+    <!--  Build Date: Thu Mar 26 2015 18:59:11 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Mar 16 2015 15:22:07 GMT-0700 (PDT)";
-        var CHECKSUM = 10271314084;
+        var APP_BUILD_DATE = "Thu Mar 26 2015 18:59:11 GMT-0700 (PDT)";
+        var CHECKSUM = 10316791349;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -493,7 +493,7 @@ Ext.define("ReleasePlanningSummary", {
                     var iteration = story.get('Iteration');
                     var today_iso = Rally.util.DateTime.toIsoString(new Date());
                                         
-                    if ( ! iteration ) {
+                    if ( ! iteration || iteration.StartDate < today_iso) {
                         points = points + record_points;
                     }
                 });

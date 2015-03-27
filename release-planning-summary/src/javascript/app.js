@@ -204,7 +204,7 @@ Ext.define("ReleasePlanningSummary", {
                     var iteration = story.get('Iteration');
                     var today_iso = Rally.util.DateTime.toIsoString(new Date());
                                         
-                    if ( ! iteration ) {
+                    if ( ! iteration || iteration.StartDate < today_iso) {
                         points = points + record_points;
                     }
                 });
