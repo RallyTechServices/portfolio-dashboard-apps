@@ -76,8 +76,8 @@ Ext.define("ReleasePlanningSummary", {
         Ext.create('Rally.data.wsapi.Store', {
             limit:'Infinity',
             model: 'HierarchicalRequirement',
-            fetch: ['FormattedID','Feature','ScheduleState','PlanEstimate','Iteration',
-                'Name', 'StartDate', 'EndDate','Project','c_RequestedRelease'],
+            fetch: ['FormattedID','Feature','ScheduleState','PlanEstimate','Iteration','Release',
+                'Name', 'StartDate', 'EndDate','Project','c_RequestedRelease','ReleaseDate'],
             filters: filters
         }).load({
             callback : function(records, operation, successful) {
@@ -120,6 +120,8 @@ Ext.define("ReleasePlanningSummary", {
         return deferred.promise;
     },
     _displayGrid: function(store,stories){
+        var me = this;
+
         this.down('#display_box').removeAll();
         this.logger.log("Grid:", store, stories);
         
@@ -183,11 +185,21 @@ Ext.define("ReleasePlanningSummary", {
                 }
                 var points = 0;
                 Ext.Array.each( record.get('_stories_not_done'), function(story) {
+                    
                     var record_points = story.get('PlanEstimate') || 0;
                     var iteration = story.get('Iteration');
                     var today_iso = Rally.util.DateTime.toIsoString(new Date());
-                                        
-                    if ( iteration && iteration.StartDate > today_iso ) {
+                    var release_end = story.get('Feature').Release.ReleaseDate;
+                    
+                    me.logger.log(release_end);
+                    
+                    if ( iteration ) {
+                        me.logger.log('compare ',iteration.EndDate,' <=? ',release_end , story.get('FormattedID'));
+                        me.logger.log(' and ', iteration.StartDate, ' >? ', today_iso );
+                    }
+                    
+                    if ( iteration && iteration.StartDate > today_iso && iteration.EndDate <= release_end ) {
+                        me.logger.log('--');
                         points = points + record_points;
                     }
                 });
@@ -203,8 +215,9 @@ Ext.define("ReleasePlanningSummary", {
                     var record_points = story.get('PlanEstimate') || 0;
                     var iteration = story.get('Iteration');
                     var today_iso = Rally.util.DateTime.toIsoString(new Date());
-                                        
-                    if ( ! iteration || iteration.StartDate < today_iso) {
+                    var release_end = story.get('Feature').Release.ReleaseDate;
+
+                    if ( ! iteration || iteration.StartDate < today_iso || iteration.EndDate > release_end) {
                         points = points + record_points;
                     }
                 });
