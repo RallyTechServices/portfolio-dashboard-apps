@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Mar 23 2015 15:15:57 GMT-0700 (PDT) -->
+    <!--  Build Date: Thu Mar 26 2015 18:42:34 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Mar 23 2015 15:15:57 GMT-0700 (PDT)";
-        var CHECKSUM = 6627811371;
+        var APP_BUILD_DATE = "Thu Mar 26 2015 18:42:34 GMT-0700 (PDT)";
+        var CHECKSUM = 6647493090;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -244,16 +244,16 @@ Ext.define('CustomApp', {
         {xtype:'tsinfolink'}
     ],
     launch: function() {
-        var models = ['portfolioitem/feature','userstory'];
+        var models = ['portfolioitem/feature','hierarchicalrequirement'];
         Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
-            models: ['portfolioitem/feature'] ,
-            autoLoad: true,
+            models: models ,
+            autoLoad: false,
             enableHierarchy: true,
             fetch: ['c_MoSCoW','Name','ObjectID','Feature',
                     'PortfolioItem','FormattedID','Project',
                     'Iteration','c_PrimaryDevTeam','c_MoSCoWPriority'],
             _getStoreTypePaths: function() {
-                return ['portfolioitem/feature','hierarchicalrequirement'];
+                return models;
             }
         }).then({
             scope: this,
@@ -320,11 +320,12 @@ Ext.define('CustomApp', {
                     gridConfig: {
                         store: store,
                         columnCfgs: [
-                              'Name',
+                        { dataIndex: 'FormattedID', text: 'id' },
+                        { dataIndex: 'Name', text: 'Name'},
                               'Owner',
                               'Iteration',
                               'PlanEstimate',
-                              'c_MoSCoW',
+                              'c_MoSCoWPriority',
                               'c_PrimaryDevTeam',
                               'Project'
                         ]

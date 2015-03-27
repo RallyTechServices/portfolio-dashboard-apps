@@ -8,16 +8,16 @@ Ext.define('CustomApp', {
         {xtype:'tsinfolink'}
     ],
     launch: function() {
-        var models = ['portfolioitem/feature','userstory'];
+        var models = ['portfolioitem/feature','hierarchicalrequirement'];
         Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
-            models: ['portfolioitem/feature'] ,
-            autoLoad: true,
+            models: models ,
+            autoLoad: false,
             enableHierarchy: true,
             fetch: ['c_MoSCoW','Name','ObjectID','Feature',
                     'PortfolioItem','FormattedID','Project',
                     'Iteration','c_PrimaryDevTeam','c_MoSCoWPriority'],
             _getStoreTypePaths: function() {
-                return ['portfolioitem/feature','hierarchicalrequirement'];
+                return models;
             }
         }).then({
             scope: this,
@@ -84,11 +84,12 @@ Ext.define('CustomApp', {
                     gridConfig: {
                         store: store,
                         columnCfgs: [
-                              'Name',
+                        { dataIndex: 'FormattedID', text: 'id' },
+                        { dataIndex: 'Name', text: 'Name'},
                               'Owner',
                               'Iteration',
                               'PlanEstimate',
-                              'c_MoSCoW',
+                              'c_MoSCoWPriority',
                               'c_PrimaryDevTeam',
                               'Project'
                         ]
