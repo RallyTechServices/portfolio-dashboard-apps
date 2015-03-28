@@ -1,103 +1,56 @@
 Ext.define('CustomApp', {
-    extend: 'Rally.app.App',
+    extend: 'Rally.app.GridBoardApp',
     componentCls: 'app',
     logger: new Rally.technicalservices.Logger(),
     defaults: { margin: 10 },
-    items: [
-        {xtype:'container',itemId:'display_box'},
-        {xtype:'tsinfolink'}
-    ],
-    launch: function() {
-        var models = ['portfolioitem/feature','hierarchicalrequirement'];
-        Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
-            models: models ,
-            autoLoad: false,
-            enableHierarchy: true,
-            fetch: ['c_MoSCoW','Name','ObjectID','Feature',
-                    'PortfolioItem','FormattedID','Project',
-                    'Iteration','c_PrimaryDevTeam','c_MoSCoWPriority'],
-            _getStoreTypePaths: function() {
-                return models;
-            }
-        }).then({
-            scope: this,
-            success: function(store) {
-                this.down('#display_box').add({
-                    xtype: 'tsgridboard',
-                    context: this.getContext(),
-                    modelNames: models,
-                    toggleState: 'grid',
-                    plugins: [
-                        {
-                            ptype: 'rallygridboardcustomfiltercontrol',
-                            filterControlConfig: {
-                                modelNames: ['portfolioitem/feature'],
-                                stateful: true,
-                                stateId: this.context.getScopedStateId('ts-printer-board')
-                            },
-                            showOwnerFilter: true,
-                            ownerFilterControlConfig: {
-                                stateful: true,
-                                stateId: this.context.getScopedStateId('ts-printer-board')
-                            }
-                        },
-                        {
-                            ptype: 'rallygridboardactionsmenu',
-                            menuItems: [
-//                                {
-//                                    text: 'Export...',
-//                                    handler: function() {
-//                                        window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(
-//                                            this.down('rallygridboard').getGridOrBoard());
-//                                    },
-//                                    scope: this
-//                                },
-                                {
-                                    text: 'Print Selected Stories...',
-                                    handler: function() {
-                                        var gridorboard = this.down('rallygridboard').getGridOrBoard();
-                                        this._getSelectedStories( gridorboard ).then({
-                                            scope: this,
-                                            success: function(stories){
-                                                this._openPrintCards(stories);
-//                                                Ext.Array.each(stories,function(story){
-//                                                    console.log(story.get('FormattedID'),story);
-//                                                });
-                                            },
-                                            failure: function(msg) {
-                                                alert(msg);
-                                            }
-                                        });
-                                        
-                                    },
-                                    scope: this
+    columnNames: ['Name','Owner','Iteration','PlanEstimate','c_MoSCoWPriority','c_PrimaryDevTeam','Project'],
+    modelNames: ['PortfolioItem/Feature'],
+    statePrefix: 'ts-pi-temp',
+    gridStoreConfig: {
+        fetch: ['Feature']
+    },
+    
+    getGridBoardPlugins: function() {
+        return  [
+            {
+                ptype: 'rallygridboardcustomfiltercontrol',
+                filterControlConfig: {
+                    modelNames: ['portfolioitem/feature'],
+                    stateful: true,
+                    stateId: this.context.getScopedStateId('ts-printer-board')
+                },
+                showOwnerFilter: true,
+                ownerFilterControlConfig: {
+                    stateful: true,
+                    stateId: this.context.getScopedStateId('ts-printer-board')
+                }
+            },
+            {
+                ptype: 'rallygridboardactionsmenu',
+                menuItems: [
+                    {
+                        text: 'Print Selected Stories...',
+                        handler: function() {
+                            var gridorboard = this.down('rallygridboard').getGridOrBoard();
+                            this._getSelectedStories( gridorboard ).then({
+                                scope: this,
+                                success: function(stories){
+                                    this._openPrintCards(stories);
+                                },
+                                failure: function(msg) {
+                                    alert(msg);
                                 }
-                            ],
-                            buttonConfig: {
-                                iconCls: 'icon-export'
-                            }
-                        }
-                    ],
-                    cardBoardConfig: {
-                        attribute: 'State'
-                    },
-                    gridConfig: {
-                        store: store,
-                        columnCfgs: [
-                        { dataIndex: 'FormattedID', text: 'id' },
-                        { dataIndex: 'Name', text: 'Name'},
-                              'Owner',
-                              'Iteration',
-                              'PlanEstimate',
-                              'c_MoSCoWPriority',
-                              'c_PrimaryDevTeam',
-                              'Project'
-                        ]
-                    },
-                    height: this.getHeight()
-                  });
-              }
-          });
+                            });
+                            
+                        },
+                        scope: this
+                    }
+                ],
+                buttonConfig: {
+                    iconCls: 'icon-export'
+                }
+            }
+        ]
     },
     _getSelectedStories: function( gridorboard ) {
         var deferred = Ext.create('Deft.Deferred');
@@ -234,6 +187,31 @@ Ext.define('CustomApp', {
             currentDocument: Ext.getDoc()
         });
         win.show();
-    }
+    },
     
+    _getGridBoardContext: function () {
+        return this.isWorkspaceScoped ? this.getContext().clone({ project: null }) : this.getContext();
+    },
+    
+    _getTreeGridStore: function () {
+        var me = this;
+        
+        return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(_.merge({
+            autoLoad: false,
+            childPageSizeEnabled: true,
+            context: me._getGridBoardContext().getDataContext(),
+            enableHierarchy: true,
+            fetch: _.union(['Workspace','Feature'], me.columnNames),
+            models: _.clone(me.models),
+            pageSize: 25,
+            remoteSort: true,
+            root: {expanded: true}
+        }, this.getGridStoreConfig())).then({
+            success: function (treeGridStore) {
+                treeGridStore.on('load', me.publishComponentReady, me, { single: true });
+                return { gridStore: treeGridStore };
+            },
+            scope: me
+        });
+    }
 });
