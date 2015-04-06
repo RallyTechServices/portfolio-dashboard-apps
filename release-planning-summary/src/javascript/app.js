@@ -190,9 +190,7 @@ Ext.define("ReleasePlanningSummary", {
                     var iteration = story.get('Iteration');
                     var today_iso = Rally.util.DateTime.toIsoString(new Date());
                     var release_end = story.get('Feature').Release.ReleaseDate;
-                    
-                    me.logger.log(release_end);
-                    
+                                        
                     if ( iteration ) {
                         me.logger.log('compare ',iteration.EndDate,' <=? ',release_end , story.get('FormattedID'));
                         me.logger.log(' and ', iteration.StartDate, ' >? ', today_iso );
@@ -276,10 +274,18 @@ Ext.define("ReleasePlanningSummary", {
         Ext.Array.each(stories, function(story) {
             var schedule_state = story.get('ScheduleState');
             var iteration = story.get('Iteration');
-            
-            if (( schedule_state == "Accepted" || schedule_state == "Completed" ) || ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso )  ) {
+            // 
+            var release_end = story.get('Feature').Release.ReleaseDate;
+            var is_current_iteration = ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso );
+            var is_iteration_inside_release = ( iteration && iteration.EndDate <= release_end );
+
+            if (( schedule_state == "Accepted" || schedule_state == "Completed" ) || ( is_current_iteration && is_iteration_inside_release )) {
                 done_stories.push(story);
             }
+            
+//            if (( schedule_state == "Accepted" || schedule_state == "Completed" ) || ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso )  ) {
+//                done_stories.push(story);
+//            }
         });
         return done_stories;
     },
@@ -292,9 +298,14 @@ Ext.define("ReleasePlanningSummary", {
             var schedule_state = story.get('ScheduleState');
             var iteration = story.get('Iteration');
             // first, is it in the current iteration?
-            if ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso ) {
-                // don't keep
-            } else if (( schedule_state != "Accepted" && schedule_state != "Completed" )) {
+            var release_end = story.get('Feature').Release.ReleaseDate;
+            var is_current_iteration = ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso );
+            var is_iteration_inside_release = ( iteration && iteration.EndDate <= release_end );
+            
+            if (
+                ( schedule_state != "Accepted" && schedule_state != "Completed" ) && 
+                ( ! ( is_current_iteration && is_iteration_inside_release ) )
+            ){
                 not_done_stories.push(story);
             }  
         });

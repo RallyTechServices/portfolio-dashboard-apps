@@ -3,11 +3,11 @@
 <head>
     <title>Release Planning Summary</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Fri Mar 27 2015 16:47:45 GMT-0700 (PDT) -->
+    <!--  Build Date: Sun Apr 05 2015 18:46:03 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Fri Mar 27 2015 16:47:45 GMT-0700 (PDT)";
-        var CHECKSUM = 10884536949;
+        var APP_BUILD_DATE = "Sun Apr 05 2015 18:46:03 GMT-0700 (PDT)";
+        var CHECKSUM = 11677933358;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -479,9 +479,7 @@ Ext.define("ReleasePlanningSummary", {
                     var iteration = story.get('Iteration');
                     var today_iso = Rally.util.DateTime.toIsoString(new Date());
                     var release_end = story.get('Feature').Release.ReleaseDate;
-                    
-                    me.logger.log(release_end);
-                    
+                                        
                     if ( iteration ) {
                         me.logger.log('compare ',iteration.EndDate,' <=? ',release_end , story.get('FormattedID'));
                         me.logger.log(' and ', iteration.StartDate, ' >? ', today_iso );
@@ -565,10 +563,18 @@ Ext.define("ReleasePlanningSummary", {
         Ext.Array.each(stories, function(story) {
             var schedule_state = story.get('ScheduleState');
             var iteration = story.get('Iteration');
-            
-            if (( schedule_state == "Accepted" || schedule_state == "Completed" ) || ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso )  ) {
+            // 
+            var release_end = story.get('Feature').Release.ReleaseDate;
+            var is_current_iteration = ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso );
+            var is_iteration_inside_release = ( iteration && iteration.EndDate <= release_end );
+
+            if (( schedule_state == "Accepted" || schedule_state == "Completed" ) || ( is_current_iteration && is_iteration_inside_release )) {
                 done_stories.push(story);
             }
+            
+//            if (( schedule_state == "Accepted" || schedule_state == "Completed" ) || ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso )  ) {
+//                done_stories.push(story);
+//            }
         });
         return done_stories;
     },
@@ -581,9 +587,14 @@ Ext.define("ReleasePlanningSummary", {
             var schedule_state = story.get('ScheduleState');
             var iteration = story.get('Iteration');
             // first, is it in the current iteration?
-            if ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso ) {
-                // don't keep
-            } else if (( schedule_state != "Accepted" && schedule_state != "Completed" )) {
+            var release_end = story.get('Feature').Release.ReleaseDate;
+            var is_current_iteration = ( iteration && iteration.StartDate < today_iso && iteration.EndDate > today_iso );
+            var is_iteration_inside_release = ( iteration && iteration.EndDate <= release_end );
+            
+            if (
+                ( schedule_state != "Accepted" && schedule_state != "Completed" ) && 
+                ( ! ( is_current_iteration && is_iteration_inside_release ) )
+            ){
                 not_done_stories.push(story);
             }  
         });
