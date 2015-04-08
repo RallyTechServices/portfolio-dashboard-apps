@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Fri Mar 27 2015 21:10:28 GMT-0700 (PDT) -->
+    <!--  Build Date: Wed Apr 08 2015 15:13:09 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Fri Mar 27 2015 21:10:28 GMT-0700 (PDT)";
-        var CHECKSUM = 6418685932;
+        var APP_BUILD_DATE = "Wed Apr 08 2015 15:13:09 GMT-0700 (PDT)";
+        var CHECKSUM = 6468700669;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -405,7 +405,8 @@ Ext.define('CustomApp', {
                 }
                 
                 var feature_string = record.get('Feature').FormattedID + ":  " + record.get('Feature').Name;
-                var project_string = record.get('Feature').c_PrimaryDevTeam;
+                //var project_string = record.get('Feature').c_PrimaryDevTeam;
+                var project_string = record.get('Project').Name;
                 var feature_project_string = record.get('Feature').Project.Name;
                 
                 return [feature_string,project_string,feature_project_string].join('<br/>');

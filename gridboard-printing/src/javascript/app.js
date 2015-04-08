@@ -169,7 +169,8 @@ Ext.define('CustomApp', {
                 }
                 
                 var feature_string = record.get('Feature').FormattedID + ":  " + record.get('Feature').Name;
-                var project_string = record.get('Feature').c_PrimaryDevTeam;
+                //var project_string = record.get('Feature').c_PrimaryDevTeam;
+                var project_string = record.get('Project').Name;
                 var feature_project_string = record.get('Feature').Project.Name;
                 
                 return [feature_string,project_string,feature_project_string].join('<br/>');
