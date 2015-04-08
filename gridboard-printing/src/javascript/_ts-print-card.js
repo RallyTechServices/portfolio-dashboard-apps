@@ -57,9 +57,25 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
                 }
                 value_html += Ext.String.format('<div class="{0}">{1}</div>',df.cls,value);
             }, this);
-            html += Ext.String.format('<div class="artifact">{0}</div>', value_html);
+            
             
             card_num ++; 
+            var artifact_classes = "artifact";
+            // for margin setting left vs right
+
+            if ((card_num) % 2 === 0 ) {
+                artifact_classes += " artifact_right";
+            } else {
+                artifact_classes += " artifact_left";
+            }
+            // for margin setting top vs. bottom
+            if ( ((card_num) % 4 === 0) || ((card_num) % 4 == 3 ) ){
+                artifact_classes += " artifact_bottom";
+            } else {
+                artifact_classes += " artifact_top";
+            }
+            html += Ext.String.format('<div class="{0}">{1}</div>', artifact_classes, value_html);
+            
             if ((card_num) % 4 === 0) {
                 html += '<div class="pb"></div>';
             } else if (card_num === total_cards - 1) {

@@ -3,11 +3,11 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Apr 08 2015 15:17:26 GMT-0700 (PDT) -->
+    <!--  Build Date: Wed Apr 08 2015 15:49:49 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Apr 08 2015 15:17:26 GMT-0700 (PDT)";
-        var CHECKSUM = 6484131862;
+        var APP_BUILD_DATE = "Wed Apr 08 2015 15:49:49 GMT-0700 (PDT)";
+        var CHECKSUM = 6966217226;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -210,9 +210,25 @@ Ext.define('Rally.technicalservices.window.PrintCards',{    extend: 'Ext.Window'
                 }
                 value_html += Ext.String.format('<div class="{0}">{1}</div>',df.cls,value);
             }, this);
-            html += Ext.String.format('<div class="artifact">{0}</div>', value_html);
+            
             
             card_num ++; 
+            var artifact_classes = "artifact";
+            // for margin setting left vs right
+
+            if ((card_num) % 2 === 0 ) {
+                artifact_classes += " artifact_right";
+            } else {
+                artifact_classes += " artifact_left";
+            }
+            // for margin setting top vs. bottom
+            if ( ((card_num) % 4 === 0) || ((card_num) % 4 == 3 ) ){
+                artifact_classes += " artifact_bottom";
+            } else {
+                artifact_classes += " artifact_top";
+            }
+            html += Ext.String.format('<div class="{0}">{1}</div>', artifact_classes, value_html);
+            
             if ((card_num) % 4 === 0) {
                 html += '<div class="pb"></div>';
             } else if (card_num === total_cards - 1) {
@@ -529,10 +545,22 @@ Ext.define('CustomApp', {
             border: 2px solid #000;
             float: left;
             height: 3.2in;
-            margin: 0.1in 0.1in 0.1in 0.1in;
             position: relative;
             overflow: hidden;
             width: 4.3in;
+        }
+        
+        .artifact_left {
+            margin-right: 0.4in;
+        }
+        .artifact_right {
+            margin-left: 0.3in;
+        }
+        .artifact_top {
+            margin-bottom: 0.3in;
+        }
+        .artifact_bottom {
+            margin-top: 0.3in;
         }
 
         .header {

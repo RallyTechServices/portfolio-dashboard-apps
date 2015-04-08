@@ -3,10 +3,10 @@
 <head>
     <title>Printing Portfolio Tree</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Apr 08 2015 15:17:26 GMT-0700 (PDT) -->
+    <!--  Build Date: Wed Apr 08 2015 15:49:49 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Apr 08 2015 15:17:26 GMT-0700 (PDT)";
+        var APP_BUILD_DATE = "Wed Apr 08 2015 15:49:49 GMT-0700 (PDT)";
         var CHECKSUM = [%= checksum %];
     </script>
     
@@ -91,10 +91,22 @@
             border: 2px solid #000;
             float: left;
             height: 3.2in;
-            margin: 0.1in 0.1in 0.1in 0.1in;
             position: relative;
             overflow: hidden;
             width: 4.3in;
+        }
+        
+        .artifact_left {
+            margin-right: 0.4in;
+        }
+        .artifact_right {
+            margin-left: 0.3in;
+        }
+        .artifact_top {
+            margin-bottom: 0.3in;
+        }
+        .artifact_bottom {
+            margin-top: 0.3in;
         }
 
         .header {
