@@ -3,7 +3,7 @@ Ext.define('CustomApp', {
     componentCls: 'app',
     logger: new Rally.technicalservices.Logger(),
     defaults: { margin: 10 },
-    columnNames: ['Name','Owner','Iteration','PlanEstimate','c_MoSCoWPriority','c_PrimaryDevTeam','Project'],
+    columnNames: ['Name','Owner','Iteration','PlanEstimate','c_MoSCoWPriority','Ready','c_PrimaryDevTeam','Project'],
     modelNames: ['PortfolioItem/Feature'],
     statePrefix: 'ts-pi-temp',
     gridStoreConfig: {
@@ -202,7 +202,7 @@ Ext.define('CustomApp', {
             childPageSizeEnabled: true,
             context: me._getGridBoardContext().getDataContext(),
             enableHierarchy: true,
-            fetch: _.union(['Workspace','Feature'], me.columnNames),
+            fetch: _.union(['Workspace','Feature','Ready'], me.columnNames),
             models: _.clone(me.models),
             pageSize: 25,
             remoteSort: true,
